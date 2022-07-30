@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.21.0)
 
 project("ccache")
 
+set(CMAKE_CXX_STANDARD 17)
+
 set(TARGAT_NAME "ccache")
 
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp")

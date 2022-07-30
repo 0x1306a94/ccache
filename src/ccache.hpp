@@ -16,7 +16,7 @@ class CCache {
     CCache(int argc, const char *const *argv);
 
     ~CCache();
-    
+
     int compilation();
 
   private:
