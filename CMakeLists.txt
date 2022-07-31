@@ -31,10 +31,22 @@ target_link_directories(
     "/usr/local/lib"
 )
 
+find_package(Boost COMPONENTS system regex REQUIRED)
+if(NOT Boost_FOUND)
+    message(FATAL_ERROR "Could not find boost!")
+endif()
+
+target_include_directories(
+    ${TARGAT_NAME}
+    PRIVATE
+    ${Boost_INCLUDE_DIRS}
+)
+
 find_library(OPENSSL_CRYPTO_LIBS crypto)
 
 message("crypto_LIBS: ", ${OPENSSL_CRYPTO_LIBS})
 target_link_libraries(
     ${TARGAT_NAME}
     ${OPENSSL_CRYPTO_LIBS}
+    ${Boost_LIBRARIES}
 )

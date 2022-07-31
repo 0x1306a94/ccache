@@ -8,21 +8,27 @@
 #ifndef ccache_hpp
 #define ccache_hpp
 
-#include <stdio.h>
+#include "context.hpp"
+
+namespace ccache {
 
 class CCache {
 
   public:
-    CCache(int argc, const char *const *argv);
+    CCache();
 
     ~CCache();
 
-    int compilation();
+    int compilation(int argc, const char *const *argv);
 
   private:
-    int m_argc;
-    const char *const *m_argv;
+    static void
+    initialize(Context &ctx, int argc, const char *const *argv);
+
+    static void find_compiler(Context &ctx);
 };
+
+}  // namespace ccache
 
 #endif /* ccache_hpp */
 
