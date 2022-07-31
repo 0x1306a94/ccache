@@ -51,7 +51,11 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
         if (strcmp(item, "-o") == 0) {
             std::string obj = argv[++i];
             orig_args_info.output_obj = obj;
-            break;
+            //            if (boost::ends_with(obj, ".gch")) {
+            //                commands.push_back(item);
+            //                commands.push_back(obj);
+            //            }
+            continue;
         }
 
         if (strcmp(item, "-target") == 0) {
@@ -108,10 +112,16 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
         std::vector<std::string> res;
         boost::split(res, pre_args_info.output_dep, boost::is_any_of("/"));
         std::vector<std::string> fix(res);
-        fix.erase(fix.begin(), fix.end() - 6);
-        fix.erase(fix.end() - 1);
 
-        res.erase(res.end() - 6, res.end());
+        if (boost::ends_with(pre_args_info.input_file, ".pch")) {
+            fix.erase(fix.begin(), fix.end() - 4);
+            fix.erase(fix.end() - 2, fix.end());
+            res.erase(res.end() - 4, res.end());
+        } else {
+            fix.erase(fix.begin(), fix.end() - 6);
+            fix.erase(fix.end() - 1);
+            res.erase(res.end() - 6, res.end());
+        }
 
         std::string orig_prefix = boost::join(res, "/");
         std::string new_suffix = boost::join(fix, "/");
@@ -119,19 +129,43 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
 
         std::string old_output_dep{pre_args_info.output_dep};
         std::string old_output_dia{pre_args_info.output_dia};
+        //        std::string old_output_obj{pre_args_info.output_obj};
 
-        fs::path dep_path{old_output_dep};
-        fs::path dia_path{old_output_dia};
+        //        fs::path dep_path{old_output_dep};
+        //        fs::path dia_path{old_output_dia};
+        std::cout << "ccache: "
+                  << "old_output_dep "
+                  << old_output_dep
+                  << std::endl;
 
-        pre_args_info.output_dep = (boost::format("%1%/%2%") % ctx.temporary_dir() % dep_path.filename().string()).str();
-        pre_args_info.output_dia = (boost::format("%1%/%2%") % ctx.temporary_dir() % dia_path.filename().string()).str();
+        std::cout << "ccache: "
+                  << "old_output_dia "
+                  << old_output_dia
+                  << std::endl;
+
+        boost::split(res, old_output_dep, boost::is_any_of("/"));
+        pre_args_info.output_dep = (boost::format("%1%/%2%") % ctx.temporary_dir() % res.at(res.size() - 1)).str();
+
+        boost::split(res, old_output_dia, boost::is_any_of("/"));
+        pre_args_info.output_dia = (boost::format("%1%/%2%") % ctx.temporary_dir() % res.at(res.size() - 1)).str();
+
+        //        if (boost::ends_with(pre_args_info.output_obj, ".gch")) {
+        //
+        //            std::cout << "ccache: pch "
+        //                      << "old_output_obj "
+        //                      << old_output_obj
+        //                      << std::endl;
+        //
+        //            boost::split(res, old_output_obj, boost::is_any_of("/"));
+        //            pre_args_info.output_obj = (boost::format("%1%/%2%") % ctx.temporary_dir() % res.at(res.size() - 1)).str();
+        //        }
 
         //        boost::format pattern_fmt = boost::format("/(.*?)%1%/");
         //        pattern_fmt % orig_args_info.device;
         //        std::string pattern = pattern_fmt.str();
         //        boost::regex regex(pattern);
 
-        for (int i = 0; i < commands.size(); i++) {
+        for (int i = 1; i < commands.size(); i++) {
             if (boost::equal(commands[i], old_output_dep)) {
                 commands[i] = pre_args_info.output_dep;
                 continue;
@@ -141,6 +175,11 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
                 commands[i] = pre_args_info.output_dia;
                 continue;
             }
+
+            //            if (boost::equal(commands[i], old_output_obj)) {
+            //                commands[i] = pre_args_info.output_obj;
+            //                continue;
+            //            }
         }
         std::string full_commands = boost::join(commands, " ");
         Args pre_args = Args::from_string(full_commands);
@@ -183,6 +222,13 @@ int CCache::compilation(int argc, const char *const *argv) {
     initialize(ctx, argc, argv);
 
     find_compiler(ctx);
+
+    if (boost::ends_with(ctx.orig_args_info().input_file, ".pch") || boost::ends_with(ctx.orig_args_info().output_obj, ".gch")) {
+        std::string orig_full_commands = ctx.orig_args().to_string();
+        int status_code = system(orig_full_commands.c_str());
+        std::cout << "ccache: compile pch status_code " << status_code << std::endl;
+        return status_code;
+    }
 
     //    std::cout << ctx.orig_args().to_string() << std::endl;
     //    std::cout << ctx.pre_args().to_string() << std::endl;
@@ -244,8 +290,14 @@ int CCache::compilation(int argc, const char *const *argv) {
 
     // 执行预处理, 同时生成 .d .dia 文件, 然后基于 .d 文件 以及源码文件 计算缓存的 key
     std::string pre_full_commands = ctx.pre_args().to_string();
+    std::cout << "ccache: gen .d \n"
+              << pre_full_commands
+              << std::endl;
+
     int status_code = system(pre_full_commands.c_str());
-    std::cout << "ccache: gen .d status_code " << status_code << std::endl;
+    std::cout << "ccache: gen .d status_code "
+              << status_code
+              << std::endl;
     if (status_code != 0) {
         return status_code;
     }
@@ -282,12 +334,18 @@ int CCache::compilation(int argc, const char *const *argv) {
             if (boost::ends_with(str, " ")) {
                 str.erase(str.end() - 1, str.end());
             }
+            // 暂时忽略
+            if (boost::contains(str, "/DerivedData/") || boost::contains(str, ".gch")) {
+                continue;
+            }
             fs::path path(str);
-            std::cout << "ccache: .d " << path.string() << std::endl;
+
             if (fs::exists(path)) {
                 auto time = fs::directory_entry(path).last_write_time();
                 auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch());
                 const std::string milliseconds_str = (boost::format("%1%") % milliseconds.count()).str();
+
+                //                std::cout << "ccache: .d " << path.string() << " " << milliseconds_str << std::endl;
                 MD5_Update(&md5_ctx, path.filename().c_str(), strlen(path.filename().c_str()));
                 MD5_Update(&md5_ctx, milliseconds_str.c_str(), strlen(milliseconds_str.c_str()));
             }
@@ -327,6 +385,9 @@ int CCache::compilation(int argc, const char *const *argv) {
     fs::path cache_file_path{(boost::format("%1%/%2%") % ctx.cache_dir() % md5_key).str()};
     if (fs::exists(cache_file_path)) {
         std::cout << "ccache: Hit the cache" << std::endl;
+        std::cout << "ccache: cp " << cache_file_path.string() << " " << orig_args_info.output_obj << std::endl;
+        std::cout << "ccache: cp " << pre_args_info.output_dep << " " << orig_args_info.output_dep << std::endl;
+        std::cout << "ccache: cp " << pre_args_info.output_dia << " " << orig_args_info.output_dia << std::endl;
         fs::copy(cache_file_path, orig_args_info.output_obj, options);
         fs::copy(pre_args_info.output_dep, orig_args_info.output_dep, options);
         fs::copy(pre_args_info.output_dia, orig_args_info.output_dia, options);
