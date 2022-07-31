@@ -1,4 +1,4 @@
-# ccache
+# ccache 编译缓存,暂时还是玩具
 
 ## build
 
