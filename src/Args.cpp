@@ -8,6 +8,7 @@
 #include "Args.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <iostream>
 
 namespace ccache {
 Args::Args(Args &&other) noexcept

@@ -17,6 +17,11 @@ source_group("Source Files" ${SOURCE_FILES})
 
 add_executable(${TARGAT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
+# set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+# link_directories("/opt/homebrew/lib")
+
+# set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf")
+
 target_include_directories(${TARGAT_NAME}
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 # target_link_directories( ${TARGAT_NAME} PRIVATE "/usr/local/lib" )
@@ -24,7 +29,7 @@ target_include_directories(${TARGAT_NAME}
 # boost
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
   include(FindBoost)
-  set(Boost_USE_STATIC_LIBS ON)
+#   set(Boost_USE_STATIC_LIBS ON)
   execute_process(
     COMMAND brew --prefix boost
     RESULT_VARIABLE BREW_BOOST
@@ -69,11 +74,9 @@ if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
     set(OPENSSL_INCLUDE_DIR "${BREW_OPENSSL_PREFIX}/include")
     set(OPENSSL_LIBRARIES "${BREW_OPENSSL_PREFIX}/lib")
     # set(OPENSSL_CRYPTO_LIBRARY "${BREW_OPENSSL_PREFIX}/lib/libcrypto.dylib")
-    set(OPENSSL_USE_STATIC_LIBS TRUE)
+    # set(OPENSSL_USE_STATIC_LIBS TRUE)
   endif()
 endif()
-
-# set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 
 find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)
@@ -88,7 +91,8 @@ else()
   message(FATAL_ERROR "OpenSSL Not Found")
 endif()
 
-# if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-#   set(CMAKE_OSX_ARCHITECTURES arm64;x86_64)
-#   message(STATUS "archs: ${CMAKE_OSX_ARCHITECTURES}")
-# endif()
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+  # set(CMAKE_OSX_ARCHITECTURES arm64;x86_64) message(STATUS "archs:
+  # ${CMAKE_OSX_ARCHITECTURES}")
+  target_compile_options(${TARGAT_NAME} PUBLIC "-DCCACHE_MACOSX_PLATFORM=1")
+endif()

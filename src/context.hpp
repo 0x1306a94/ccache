@@ -22,19 +22,19 @@ class Context {
 
     void append_temporary_dir(std::string &str);
 
-    void set_orig_args(Args &args) {
+    void set_orig_args(Args args) {
         m_orig_args = args;
     }
 
-    void set_pre_args(Args &args) {
+    void set_pre_args(Args args) {
         m_pre_args = args;
     }
 
-    void set_orig_args_info(ArgsInfo &args_info) {
+    void set_orig_args_info(ArgsInfo args_info) {
         m_orig_args_info = args_info;
     }
 
-    void set_pre_args_info(ArgsInfo &args_info) {
+    void set_pre_args_info(ArgsInfo args_info) {
         m_pre_args_info = args_info;
     }
 

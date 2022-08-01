@@ -25,6 +25,8 @@ class CCache {
     static void
     initialize(Context &ctx, int argc, const char *const *argv);
 
+    std::pair<bool, std::string> do_cache_compilation(Context &ctx);
+
     static void find_compiler(Context &ctx);
 };
 
