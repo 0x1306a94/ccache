@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "macFrameworkPath": [],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c99",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-arm64",
+            "compilerArgs": [
+                "-I/opt/homebrew/opt/openssl/include",
+                "-I/opt/homebrew/opt/boost/include",
+                "-I/usr/local/openssl/include",
+                "-I/usr/local/boost/include",
+                "-I${workspaceFolder}/src"
+            ]
+        }
+    ],
+    "version": 4
+}

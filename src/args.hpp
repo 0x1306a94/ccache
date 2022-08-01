@@ -5,8 +5,8 @@
 //  Created by king on 2022/7/31.
 //
 
-#ifndef args_hpp
-#define args_hpp
+#ifndef Args_hpp
+#define Args_hpp
 
 #include <deque>
 #include <optional>
@@ -106,5 +106,5 @@ Args::operator[](size_t i) {
 }
 
 };     // namespace ccache
-#endif /* args_hpp */
+#endif /* Args_hpp */
 
