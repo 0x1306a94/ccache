@@ -63,10 +63,12 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
 
         orig_args.push_back(arg_item);
         if (boost::starts_with(arg_item, "-o")) {
-            std::string obj = Util::path_escape(argv[++i]);
-            orig_args_info.output_obj = obj;
+            auto output_obj = argv[++i];
+            auto path_escape_output_obj = Util::path_escape(output_obj);
+            std::string obj = path_escape_output_obj;
+            orig_args_info.output_obj = output_obj;
 
-            orig_args.push_back(obj);
+            orig_args.push_back(path_escape_output_obj);
             continue;
         }
 
@@ -99,8 +101,15 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
         }
 
         if (boost::starts_with(arg_item, "-c")) {
-            orig_args_info.input_file = Util::path_escape(argv[++i]);
-            orig_args.push_back(orig_args_info.input_file);
+            auto input_file = argv[++i];
+            auto path_escape_input_file = Util::path_escape(input_file);
+            orig_args_info.input_file = input_file;
+            orig_args.push_back(path_escape_input_file);
+
+            std::cout << "ccache: "
+                      << "input_file "
+                      << input_file
+                      << std::endl;
 
             pre_args.push_back("-fsyntax-only");
             // pre_args.push_back("-E");
@@ -110,8 +119,11 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
 
         // .d
         if (boost::starts_with(arg_item, "-MF")) {
-            orig_args_info.output_dep = Util::path_escape(argv[++i]);
-            orig_args.push_back(orig_args_info.output_dep);
+
+            auto dep = argv[++i];
+            auto path_escape_dep = Util::path_escape(dep);
+            orig_args_info.output_dep = path_escape_dep;
+            orig_args.push_back(path_escape_dep);
 
             std::cout << "ccache: "
                       << "old_output_dep "
@@ -134,8 +146,10 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
 
         // .dia
         if (boost::starts_with(arg_item, "--serialize-diagnostics")) {
-            orig_args_info.output_dia = Util::path_escape(argv[++i]);
-            orig_args.push_back(orig_args_info.output_dia);
+            auto dia = argv[++i];
+            auto path_escape_dia = Util::path_escape(dia);
+            orig_args_info.output_dia = path_escape_dia;
+            orig_args.push_back(path_escape_dia);
 
             std::cout << "ccache: "
                       << "old_output_dia "
@@ -458,9 +472,26 @@ int CCache::compilation(int argc, const char *const *argv) {
 
     int status_code = system(orig_full_commands.c_str());
 
+    std::cout << "ccache: compile exit code "
+              << status_code
+              << std::endl;
+
     std::cout << "ccache: checking the build product "
               << std::endl;
-    if (fs::exists(orig_args_info.output_obj) && fs::exists(orig_args_info.output_dep) && fs::exists(orig_args_info.output_dia) && !cache_key.empty()) {
+    if (fs::exists(orig_args_info.output_obj) && fs::exists(orig_args_info.output_dep) && !cache_key.empty()) {
+
+        std::cout << "ccache: Save the cache ..."
+                  << std::endl;
+        if (!fs::exists(orig_args_info.output_dia)) {
+            std::cout << "ccache: di not exists"
+                      << std::endl;
+            std::string cmd{"touch "};
+            cmd.append(orig_args_info.output_dia);
+            system(cmd.c_str());
+            //            std::ofstream file(orig_args_info.output_dia);
+            //            file.close();
+        }
+
         fs::copy_options options = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
         fs::path cache_file_path{(boost::format("%1%/%2%") % ctx.cache_dir() % cache_key).str()};
         fs::copy(orig_args_info.output_obj, cache_file_path, options);
