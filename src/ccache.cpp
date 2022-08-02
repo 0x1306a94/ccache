@@ -7,6 +7,7 @@
 
 #include "ccache.hpp"
 
+#include "DigestCalculate.hpp"
 #include "Finalizer.hpp"
 #include "Util.hpp"
 
@@ -29,18 +30,14 @@
 
 namespace fs = std::filesystem;
 
-extern "C" {
-#include <openssl/md5.h>
-};
-
 namespace ccache {
 
 CCache::CCache() {
-    //    std::cout << __FUNCTION__ << std::endl;
+    std::cout << __FUNCTION__ << std::endl;
 }
 
 CCache::~CCache() {
-    //    std::cout << __FUNCTION__ << std::endl;
+    std::cout << __FUNCTION__ << std::endl;
 }
 
 void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
@@ -80,7 +77,9 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
             orig_args_info.arch = split[0];
             orig_args_info.platform = split[1];
             orig_args_info.os = split[2];
-            orig_args_info.device = split[3];
+            if (split.size() >= 4) {
+                orig_args_info.device = split[3];
+            }
 
             orig_args.push_back(target);
 
@@ -206,18 +205,9 @@ void CCache::find_compiler(Context &ctx) {
     pre_args[0] = compiler;
 }
 
-std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx) {
+std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc, const char *const *argv) {
 
-    unsigned char md5_buffer[MD5_DIGEST_LENGTH];
-    MD5_CTX md5_ctx;
-    MD5_Init(&md5_ctx);
-    bool md5_finaled = false;
-
-    ccache::Finalizer md5_finalizer([&md5_ctx, &md5_finaled, &md5_buffer] {
-        if (!md5_finaled) {
-            MD5_Final(md5_buffer, &md5_ctx);
-        }
-    });
+    std::unique_ptr<DigestCalculate> digestCalculate(new DigestCalculate);
 
     struct SkipArgsInfo {
         std::string prefix;
@@ -237,12 +227,18 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx) {
             {"-c", true},
             {"-o", true},
         };
-    std::vector<const char *> to_argv = ctx.orig_args().to_argv();
-    for (int i = 1; i < to_argv.size(); i++) {
-        const char *item = to_argv[i];
+
+    std::cout << "ccache: argvs size "
+              << argc
+              << "\n";
+    for (int i = 1; i < argc; i++) {
+        const char *item = argv[i];
+
         if (item == nullptr) {
             continue;
         }
+
+        //        std::cout << item << std::endl;
         bool skip = false;
         for (SkipArgsInfo &skip_info : skip_argv_infos) {
             if (strncmp(item, skip_info.prefix.c_str(), strlen(skip_info.prefix.c_str())) == 0) {
@@ -256,15 +252,18 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx) {
         if (skip) {
             continue;
         }
-        MD5_Update(&md5_ctx, item, strlen(item));
+        //        const std::string str(item);
+        //        digestCalculate->Update(str);
+        digestCalculate->Update(item, strlen(item));
     }
 
     // 执行预处理, 同时生成 .d .dia 文件, 然后基于 .d 文件 以及源码文件 计算缓存的 key
     std::string pre_full_commands = ctx.pre_args().to_string();
-    pre_full_commands.append(" > /dev/null");
-    //    std::cout << "ccache: pre gen .d \n"
+    std::cout << "ccache: pre gen .d \n";
     //              << pre_full_commands
     //              << std::endl;
+
+    pre_full_commands.append(" 2>/dev/null");
 
     int status_code = system(pre_full_commands.c_str());
     std::cout << "ccache: gen .d status_code "
@@ -284,13 +283,11 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx) {
             return std::make_pair(false, "");
         }
 
-        //        std::stringstream ss;
-        //        ss << ifs.rdbuf();
-        //        std::string content{ss.str()};
-
         std::string line;
         while (getline(ifs, line)) {
+
             std::string fix_line{line};
+            //            std::cout << "line: " << fix_line << "\n";
             auto pos = fix_line.find("/");
             if (pos == std::string::npos) {
                 continue;
@@ -307,27 +304,23 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx) {
             fs::path path{fix_line};
             if (fs::exists(path)) {
 
-                MD5_Update(&md5_ctx, path.filename().c_str(), strlen(path.filename().c_str()));
+                const std::string filename = path.filename();
+
+                digestCalculate->Update(filename);
+
                 if (boost::contains(fix_line, "/DerivedData/")) {
                     // 自动生成的文件
-                    std::ifstream ifs(ctx.pre_args_info().output_dep, std::ios::in);
-                    if (!ifs.is_open()) {
-                        return std::make_pair(false, "");
-                    }
-
-                    std::stringstream ss;
-                    ss << ifs.rdbuf();
-                    std::string content{ss.str()};
-                    MD5_Update(&md5_ctx, content.c_str(), strlen(content.c_str()));
-                    ifs.close();
-
+                    digestCalculate->UpdateFormFile(fix_line);
                 } else {
                     auto time = fs::directory_entry(path).last_write_time();
                     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch());
                     const std::string milliseconds_str = (boost::format("%1%") % milliseconds.count()).str();
-                    MD5_Update(&md5_ctx, milliseconds_str.c_str(), strlen(milliseconds_str.c_str()));
+                    //                    std::cout << "ccache: .d "
+                    //                              << path.string() << " "
+                    //                              << milliseconds_str
+                    //                              << std::endl;
+                    digestCalculate->Update(milliseconds_str);
                 }
-                //                std::cout << "ccache: .d " << path.string() << " " << milliseconds_str << std::endl;
             }
         }
         ifs.close();
@@ -335,33 +328,20 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx) {
     } while (0);
 
     do {
-        std::ifstream ifs(ctx.pre_args_info().input_file, std::ios::in);
-        if (!ifs.is_open()) {
-            return std::make_pair(false, "");
-        }
-
-        std::stringstream ss;
-        ss << ifs.rdbuf();
-        std::string content{ss.str()};
-        MD5_Update(&md5_ctx, content.c_str(), strlen(content.c_str()));
-        ifs.close();
+        const std::string input_file = ctx.pre_args_info().input_file;
+        digestCalculate->UpdateFormFile(input_file);
     } while (0);
 
-    md5_finaled = true;
-    MD5_Final(md5_buffer, &md5_ctx);
+    digestCalculate->Final();
+    std::string digest = digestCalculate->Digest();
 
-    char md5_key[MD5_DIGEST_LENGTH * 2 + 1] = {'\0'};
-    for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
-        sprintf(md5_key + i * 2, "%02x", md5_buffer[i]);
-    }
-
-    std::cout << "ccache: cache key " << md5_key << std::endl;
+    std::cout << "ccache: cache key " << digest << std::endl;
 
     ArgsInfo &orig_args_info = ctx.orig_args_info();
     ArgsInfo &pre_args_info = ctx.pre_args_info();
 
     fs::copy_options options = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
-    fs::path cache_file_path{(boost::format("%1%/%2%") % ctx.cache_dir() % md5_key).str()};
+    fs::path cache_file_path{(boost::format("%1%/%2%") % ctx.cache_dir() % digest).str()};
     if (fs::exists(cache_file_path)) {
         std::cout << "ccache: Hit the cache" << std::endl;
         std::cout << "ccache: cp " << cache_file_path.string() << " " << orig_args_info.output_obj << std::endl;
@@ -370,9 +350,9 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx) {
         fs::copy(cache_file_path, orig_args_info.output_obj, options);
         fs::copy(pre_args_info.output_dep, orig_args_info.output_dep, options);
         fs::copy(pre_args_info.output_dia, orig_args_info.output_dia, options);
-        return std::make_pair(true, md5_key);
+        return std::make_pair(true, digest);
     }
-    return std::make_pair(false, md5_key);
+    return std::make_pair(false, digest);
 }
 
 int CCache::compilation(int argc, const char *const *argv) {
@@ -393,19 +373,6 @@ int CCache::compilation(int argc, const char *const *argv) {
     ctx.append_temporary_dir(cur_work_dir_name);
 
     ccache::Finalizer clenup_finalizer([&ctx] {
-        //        ArgsInfo &pre_args_info = ctx.pre_args_info();
-        //        fs::path output_dep{pre_args_info.output_dep};
-        //        fs::path output_dia{pre_args_info.output_dia};
-        //
-        //        if (fs::exists(output_dep)) {
-        //            std::cout << "ccache: cleanup dep " << pre_args_info.output_dep << std::endl;
-        //            fs::remove(output_dep);
-        //        }
-        //
-        //        if (fs::exists(output_dia)) {
-        //            std::cout << "ccache: cleanup dia " << pre_args_info.output_dia << std::endl;
-        //            fs::remove(output_dia);
-        //        }
         auto temporary_dir = ctx.temporary_dir();
         if (fs::exists(temporary_dir)) {
             std::error_code code;
@@ -428,7 +395,7 @@ int CCache::compilation(int argc, const char *const *argv) {
         return status_code;
     }
 
-    auto result = do_cache_compilation(ctx);
+    auto result = do_cache_compilation(ctx, argc, argv);
     auto hit_cache = result.first;
     auto cache_key = result.second;
     if (hit_cache) {
@@ -478,27 +445,41 @@ int CCache::compilation(int argc, const char *const *argv) {
 
     std::cout << "ccache: checking the build product "
               << std::endl;
-    if (fs::exists(orig_args_info.output_obj) && fs::exists(orig_args_info.output_dep) && !cache_key.empty()) {
-
-        std::cout << "ccache: Save the cache ..."
+    if (!fs::exists(orig_args_info.output_obj)) {
+        std::cout << "ccache: output_obj not exists "
                   << std::endl;
-        if (!fs::exists(orig_args_info.output_dia)) {
-            std::cout << "ccache: di not exists"
-                      << std::endl;
-            std::string cmd{"touch "};
-            cmd.append(orig_args_info.output_dia);
-            system(cmd.c_str());
-            //            std::ofstream file(orig_args_info.output_dia);
-            //            file.close();
-        }
-
-        fs::copy_options options = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
-        fs::path cache_file_path{(boost::format("%1%/%2%") % ctx.cache_dir() % cache_key).str()};
-        fs::copy(orig_args_info.output_obj, cache_file_path, options);
-        std::cout << "ccache: Save the cache " << cache_file_path.string() << std::endl;
-        return EXIT_SUCCESS;
+        return status_code;
     }
-    return status_code;
+
+    if (!fs::exists(orig_args_info.output_dep)) {
+        std::cout << "ccache: output_dep not exists "
+                  << std::endl;
+        return status_code;
+    }
+
+    if (!fs::exists(orig_args_info.output_dia)) {
+        std::cout << "ccache: output_dia not exists "
+                  << std::endl;
+        return status_code;
+    }
+
+    if (cache_key.empty()) {
+        std::cout << "ccache: cache_key is empty "
+                  << std::endl;
+        return status_code;
+    }
+
+    if (status_code != 0) {
+        return status_code;
+    }
+
+    std::cout << "ccache: Save the cache ..."
+              << std::endl;
+    fs::copy_options options = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
+    fs::path cache_file_path{(boost::format("%1%/%2%") % ctx.cache_dir() % cache_key).str()};
+    fs::copy(orig_args_info.output_obj, cache_file_path, options);
+    std::cout << "ccache: Save the cache " << cache_file_path.string() << std::endl;
+    return EXIT_SUCCESS;
 }
 
 };  // namespace ccache

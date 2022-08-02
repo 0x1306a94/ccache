@@ -44,8 +44,14 @@ int main(int argc, char *const *argv) {
     signal(SIGSEGV, handler);
     signal(SIGSYS, handler);
 
-    ccache::CCache cache;
-    int result = cache.compilation(argc, argv);
+    //    execv(argv[1], (argv + 1));
+    //    char **clone_argv = (char **)malloc(sizeof(char **) * argc);
+    //    for (int i = 0; i < argc; i++) {
+    //        clone_argv[i] = strdup(argv[i]);
+    //    }
+    std::unique_ptr<ccache::CCache> cache(new ccache::CCache);
+    int result = cache->compilation(argc, argv);
+    //    free(clone_argv);
     return result;
 }
 
