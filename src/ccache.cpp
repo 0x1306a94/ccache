@@ -110,8 +110,8 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
                       << input_file
                       << std::endl;
 
-            pre_args.push_back("-fsyntax-only");
-            // pre_args.push_back("-E");
+            //            pre_args.push_back("-fsyntax-only");
+            pre_args.push_back("-E");
             pre_args.push_back(orig_args_info.input_file);
             continue;
         }
@@ -262,7 +262,7 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
     //              << pre_full_commands
     //              << std::endl;
 
-    pre_full_commands.append(" 2>/dev/null");
+    pre_full_commands.append(" >/dev/null 2>&1");
 
     int status_code = system(pre_full_commands.c_str());
     std::cout << "ccache: gen .d status_code "
