@@ -18,18 +18,34 @@ source_group("Source Files" ${SOURCE_FILES})
 add_executable(${TARGAT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 # set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-# link_directories("/opt/homebrew/lib")
 
 # set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf")
 
 target_include_directories(${TARGAT_NAME}
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
-# target_link_directories( ${TARGAT_NAME} PRIVATE "/usr/local/lib" )
+
+# icu4c
+# if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+#   execute_process(
+#     COMMAND brew --prefix icu4c
+#     RESULT_VARIABLE BREW_ICU4C
+#     OUTPUT_VARIABLE BREW_ICU4C_PREFIX
+#     OUTPUT_STRIP_TRAILING_WHITESPACE)
+#   if(BREW_ICU4C EQUAL 0 AND EXISTS "${BREW_ICU4C_PREFIX}")
+#     message(
+#       STATUS "Found icu4 keg installed by Homebrew at ${BREW_ICU4C_PREFIX}")
+#     set(ICU4C_ROOT_DIR "${BREW_ICU4C_PREFIX}/")
+#     set(ICU4C_INCLUDE_DIR "${BREW_ICU4C_PREFIX}/include")
+#     set(ICU4C_LIBRARIES "${BREW_ICU4C_PREFIX}/lib")
+
+#     target_link_directories(${TARGAT_NAME} PUBLIC ${ICU4C_LIBRARIES})
+#   endif()
+# endif()
 
 # boost
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
   include(FindBoost)
-#   set(Boost_USE_STATIC_LIBS ON)
+  # set(Boost_USE_STATIC_LIBS ON)
   execute_process(
     COMMAND brew --prefix boost
     RESULT_VARIABLE BREW_BOOST
