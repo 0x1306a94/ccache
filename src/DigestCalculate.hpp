@@ -10,7 +10,7 @@
 
 #include <string>
 extern "C" {
-#include <openssl/md5.h>
+#include <openssl/evp.h>
 };
 
 namespace ccache {
@@ -19,6 +19,7 @@ class DigestCalculate {
     DigestCalculate();
     ~DigestCalculate();
 
+    void Init();
     void Update(const void *data, size_t len);
     void Update(const std::string &content);
     void UpdateFormFile(const std::string &path);
@@ -29,7 +30,7 @@ class DigestCalculate {
 
   private:
     std::string m_digest;
-    MD5_CTX m_ctx;
+    EVP_MD_CTX *m_ctx{nullptr};
 };
 };     // namespace ccache
 #endif /* DigestCalculate_hpp */

@@ -8,30 +8,54 @@
 #include "DigestCalculate.hpp"
 
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <iostream>
+#include <sstream>
 
 namespace fs = boost::filesystem;
 
 namespace ccache {
 
 DigestCalculate::DigestCalculate() {
-    MD5_Init(&m_ctx);
     std::cout << __FUNCTION__ << std::endl;
 }
 
 DigestCalculate::~DigestCalculate() {
     std::cout << __FUNCTION__ << std::endl;
+    if (m_ctx != nullptr) {
+        EVP_MD_CTX_free(m_ctx);
+        m_ctx = nullptr;
+    }
+}
+
+void DigestCalculate::Init() {
+    if (m_ctx != nullptr) {
+        EVP_MD_CTX_free(m_ctx);
+        m_ctx = nullptr;
+    }
+    m_ctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(m_ctx, EVP_md5(), NULL);
 }
 
 void DigestCalculate::Update(const void *data, size_t len) {
-    MD5_Update(&m_ctx, data, len);
+    if (m_ctx == nullptr) {
+        return;
+    }
+    EVP_DigestUpdate(m_ctx, data, len);
 }
 
 void DigestCalculate::Update(const std::string &content) {
-    MD5_Update(&m_ctx, content.c_str(), strlen(content.c_str()));
+    if (m_ctx == nullptr) {
+        return;
+    }
+    EVP_DigestUpdate(m_ctx, content.c_str(), strlen(content.c_str()));
 }
 
 void DigestCalculate::UpdateFormFile(const std::string &path) {
+    if (m_ctx == nullptr) {
+        return;
+    }
+
     if (!fs::exists(path)) {
         std::cout << "ccache: DigestCalculate file not exists \n"
                   << path
@@ -54,7 +78,7 @@ void DigestCalculate::UpdateFormFile(const std::string &path) {
         if (ret == 0) {
             break;
         }
-        MD5_Update(&m_ctx, (void *)data, ret);
+        EVP_DigestUpdate(m_ctx, (void *)data, ret);
     }
     fclose(fp);
     fp = NULL;
@@ -62,15 +86,23 @@ void DigestCalculate::UpdateFormFile(const std::string &path) {
 }
 
 void DigestCalculate::Final() {
-    unsigned char buffer[MD5_DIGEST_LENGTH];
-    MD5_Final(buffer, &m_ctx);
 
-    char md5_key[MD5_DIGEST_LENGTH * 2 + 1] = {'\0'};
-    for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
-        sprintf(md5_key + i * 2, "%02x", buffer[i]);
+    unsigned int md5_digest_len = EVP_MD_size(EVP_md5());
+
+    // MD5_Final
+    unsigned char *md5_digest = (unsigned char *)OPENSSL_malloc(md5_digest_len);
+    EVP_DigestFinal_ex(m_ctx, md5_digest, &md5_digest_len);
+    EVP_MD_CTX_free(m_ctx);
+    m_ctx = nullptr;
+
+    char out[EVP_MAX_MD_SIZE * 2 + 1] = {'\0'};
+    for (int i = 0; i < md5_digest_len; i++) {
+        sprintf(out + i * 2, "%02x", md5_digest[i]);
     }
 
-    m_digest = md5_key;
+    OPENSSL_free(md5_digest);
+
+    m_digest = out;
 }
 };  // namespace ccache
 

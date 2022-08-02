@@ -11,6 +11,8 @@
 
 #include "ccache.hpp"
 
+#include "DigestCalculate.hpp"
+
 void handler(int sig) {
 #define BACK_TRACE_DEPTH 512
     void *array[BACK_TRACE_DEPTH];
@@ -43,6 +45,14 @@ int main(int argc, char *const *argv) {
     signal(SIGBUS, handler);  // install our handler
     signal(SIGSEGV, handler);
     signal(SIGSYS, handler);
+
+    //    std::unique_ptr<ccache::DigestCalculate> digestCalculate(new ccache::DigestCalculate);
+    //    digestCalculate->Init();
+    //
+    //    digestCalculate->Update("ccache");
+    //    digestCalculate->Final();
+    //
+    //    std::cout << "md5: " << digestCalculate->Digest() << "\n";
 
     //    execv(argv[1], (argv + 1));
     //    char **clone_argv = (char **)malloc(sizeof(char **) * argc);
