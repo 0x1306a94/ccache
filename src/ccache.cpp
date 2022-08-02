@@ -209,7 +209,7 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
 
     std::unique_ptr<DigestCalculate> digestCalculate(new DigestCalculate);
     digestCalculate->Init();
-    
+
     struct SkipArgsInfo {
         std::string prefix;
         bool next = false;
@@ -229,9 +229,9 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
             {"-o", true},
         };
 
-    std::cout << "ccache: argvs size "
-              << argc
-              << "\n";
+    //    std::cout << "ccache: argvs size "
+    //              << argc
+    //              << "\n";
     for (int i = 1; i < argc; i++) {
         const char *item = argv[i];
 
@@ -253,8 +253,6 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         if (skip) {
             continue;
         }
-        //        const std::string str(item);
-        //        digestCalculate->Update(str);
         digestCalculate->Update(item, strlen(item));
     }
 
@@ -336,14 +334,23 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
     digestCalculate->Final();
     std::string digest = digestCalculate->Digest();
 
-    std::cout << "ccache: cache key " << digest << std::endl;
+    std::cout << "ccache: cache key "
+              << digest
+              << std::endl;
 
     ArgsInfo &orig_args_info = ctx.orig_args_info();
     ArgsInfo &pre_args_info = ctx.pre_args_info();
 
     fs::copy_options options = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
-    fs::path cache_file_path{(boost::format("%1%/%2%") % ctx.cache_dir() % digest).str()};
-    if (fs::exists(cache_file_path)) {
+    const std::string path = (boost::format("%1%/%2%") % ctx.cache_dir() % digest).str();
+    fs::path cache_file_path{path};
+
+    std::cout << "ccache: cache file "
+              << path
+              << std::endl;
+
+    boost::system::error_code code;
+    if (fs::exists(cache_file_path, code)) {
         std::cout << "ccache: Hit the cache" << std::endl;
         std::cout << "ccache: cp " << cache_file_path.string() << " " << orig_args_info.output_obj << std::endl;
         std::cout << "ccache: cp " << pre_args_info.output_dep << " " << orig_args_info.output_dep << std::endl;
@@ -352,6 +359,10 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         fs::copy(pre_args_info.output_dep, orig_args_info.output_dep, options);
         fs::copy(pre_args_info.output_dia, orig_args_info.output_dia, options);
         return std::make_pair(true, digest);
+    } else {
+        std::cout << "ccache: cache file exists code "
+                  << code
+                  << std::endl;
     }
     return std::make_pair(false, digest);
 }
