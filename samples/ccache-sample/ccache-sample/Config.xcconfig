@@ -1,0 +1,12 @@
+//
+//  Config.xcconfig
+//  ccache-sample
+//
+//  Created by king on 2022/8/2.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+CC=$(SRCROOT)/ccache/ccache-clang
+CXX=$(SRCROOT)/ccache/ccache-clang++

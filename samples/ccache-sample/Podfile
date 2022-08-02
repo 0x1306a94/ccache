@@ -1,10 +1,68 @@
 # Uncomment the next line to define a global platform for your project
 # platform :ios, '9.0'
 
+platform :ios, "11.0"
+inhibit_all_warnings!
+install! "cocoapods",
+#  :disable_input_output_paths => true,
+  :generate_multiple_pod_projects => true,
+  :warn_for_unused_master_specs_repo => false
+
 target 'ccache-sample' do
   # Comment the next line if you don't want to use dynamic frameworks
-  use_frameworks!
+#  use_frameworks!
+  
+  pod 'MBProgressHUD'
+  pod 'KVOController'
+  pod 'BlocksKit'
+  pod 'Aspects'
+  pod 'iOS-Category'
+  pod 'SDWebImage'
+  pod 'SDWebImageFLPlugin'
+  pod 'WebViewJavascriptBridge'
+  pod 'YYText'
+  pod 'YYModel'
+  pod 'pop'
+  pod 'AFNetworking'
+  pod "MJRefresh", "3.2.0"
+  pod "lottie-ios", "2.5.3"
+  pod "ReactiveObjC"
+  pod "Masonry"
+  pod 'CYLTabBarController'
+  pod 'Texture'
+  pod 'IQKeyboardManager'
+  pod 'QMUIKit'
+  pod "JXPagingView/Pager", "2.0.12"
+  pod "JXCategoryView", "1.5.6"
+  pod "ZFPlayer/ControlView", "4.0.3"
+  pod "ZFPlayer/AVPlayer", "4.0.3"
+  pod "SVGAPlayer", "2.5.6"
+  pod "SSZipArchive", "2.4.2"
+  pod "Protobuf", "3.17.0"
 
+  pod "IGListKit", "4.0.0"
+  pod 'DZNEmptyDataSet'
+  pod 'PDTSimpleCalendar'
+  pod 'MagicalRecord'
+  pod 'ChameleonFramework/Default'
+  pod 'GPUImage'
+  pod 'SVProgressHUD'
+  pod 'MGSwipeTableCell'
+  pod 'KTVHTTPCache'
   # Pods for ccache-sample
 
 end
+
+post_install do |installer|
+
+  installer.generated_projects.each do |project|
+    project.targets.each do |target|
+   
+      target.build_configurations.each do |config|
+        config.build_settings["CC"] = "${PODS_ROOT}/../ccache/ccache-clang"
+        config.build_settings["CXX"] = "${PODS_ROOT}/../ccache/ccache-clang++"
+      end
+    end
+  end
+end
+

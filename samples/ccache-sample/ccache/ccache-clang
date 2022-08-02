@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# ccache-clang
+CUR_DIR=$(dirname $0)
+export CCACHE_DIR=$(dirname $0)/caches
+export PATH=$CUR_DIR:$PATH
+mkdir -p $CCACHE_DIR
+# env
+
+# /usr/bin/clang "$@"
+ccache /usr/bin/clang "$@"

@@ -14,9 +14,11 @@
 		3CAE28D12898D1A0003F03E5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CAE28D02898D1A0003F03E5 /* Assets.xcassets */; };
 		3CAE28D42898D1A0003F03E5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CAE28D22898D1A0003F03E5 /* LaunchScreen.storyboard */; };
 		3CAE28D72898D1A0003F03E5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CAE28D62898D1A0003F03E5 /* main.m */; };
+		83E450D3F05C75ADCC042EF8 /* libPods-ccache-sample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6924FFD53B184A0B8FAC0BF /* libPods-ccache-sample.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1FC0B7B52EC49B34A95DC8FD /* Pods-ccache-sample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ccache-sample.release.xcconfig"; path = "Target Support Files/Pods-ccache-sample/Pods-ccache-sample.release.xcconfig"; sourceTree = "<group>"; };
 		3CAE28C12898D19E003F03E5 /* ccache-sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ccache-sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CAE28C42898D19E003F03E5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		3CAE28C52898D19E003F03E5 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -29,6 +31,8 @@
 		3CAE28D32898D1A0003F03E5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3CAE28D52898D1A0003F03E5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CAE28D62898D1A0003F03E5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		D6924FFD53B184A0B8FAC0BF /* libPods-ccache-sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ccache-sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0FFDD2734A4E6340B4C1099 /* Pods-ccache-sample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ccache-sample.debug.xcconfig"; path = "Target Support Files/Pods-ccache-sample/Pods-ccache-sample.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83E450D3F05C75ADCC042EF8 /* libPods-ccache-sample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +52,8 @@
 			children = (
 				3CAE28C32898D19E003F03E5 /* ccache-sample */,
 				3CAE28C22898D19E003F03E5 /* Products */,
+				5F741CB8448A8001B95B5946 /* Pods */,
+				4DDF2A0FAF78C990372C501B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -76,6 +83,24 @@
 			path = "ccache-sample";
 			sourceTree = "<group>";
 		};
+		4DDF2A0FAF78C990372C501B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D6924FFD53B184A0B8FAC0BF /* libPods-ccache-sample.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5F741CB8448A8001B95B5946 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				F0FFDD2734A4E6340B4C1099 /* Pods-ccache-sample.debug.xcconfig */,
+				1FC0B7B52EC49B34A95DC8FD /* Pods-ccache-sample.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -83,9 +108,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3CAE28DA2898D1A0003F03E5 /* Build configuration list for PBXNativeTarget "ccache-sample" */;
 			buildPhases = (
+				263772EA24A9CF8147D3125E /* [CP] Check Pods Manifest.lock */,
 				3CAE28BD2898D19E003F03E5 /* Sources */,
 				3CAE28BE2898D19E003F03E5 /* Frameworks */,
 				3CAE28BF2898D19E003F03E5 /* Resources */,
+				02E7081F81285C70A846DC70 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -140,6 +167,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		02E7081F81285C70A846DC70 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ccache-sample/Pods-ccache-sample-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ccache-sample/Pods-ccache-sample-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ccache-sample/Pods-ccache-sample-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		263772EA24A9CF8147D3125E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ccache-sample-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3CAE28BD2898D19E003F03E5 /* Sources */ = {
@@ -287,6 +356,7 @@
 		};
 		3CAE28DB2898D1A0003F03E5 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F0FFDD2734A4E6340B4C1099 /* Pods-ccache-sample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -313,6 +383,7 @@
 		};
 		3CAE28DC2898D1A0003F03E5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FC0B7B52EC49B34A95DC8FD /* Pods-ccache-sample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
