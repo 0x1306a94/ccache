@@ -12,11 +12,11 @@
 #include "Util.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/regex.hpp>
 #include <chrono>
 #include <errno.h>
-#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <ratio>
@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <vector>
 
-namespace fs = std::filesystem;
+namespace fs = boost::filesystem;
 
 namespace ccache {
 
@@ -301,10 +301,11 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
             while ((pos = fix_line.find("\\")) != std::string::npos) {
                 fix_line.erase(fix_line.begin() + pos, fix_line.begin() + pos + 1);
             }
+
             fs::path path{fix_line};
             if (fs::exists(path)) {
 
-                const std::string filename = path.filename();
+                const std::string filename = path.filename().string();
 
                 digestCalculate->Update(filename);
 
@@ -312,9 +313,8 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
                     // 自动生成的文件
                     digestCalculate->UpdateFormFile(fix_line);
                 } else {
-                    auto time = fs::directory_entry(path).last_write_time();
-                    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch());
-                    const std::string milliseconds_str = (boost::format("%1%") % milliseconds.count()).str();
+                    auto time = fs::last_write_time(path);
+                    const std::string milliseconds_str = (boost::format("%1%") % time).str();
                     //                    std::cout << "ccache: .d "
                     //                              << path.string() << " "
                     //                              << milliseconds_str
@@ -373,12 +373,12 @@ int CCache::compilation(int argc, const char *const *argv) {
     ctx.append_temporary_dir(cur_work_dir_name);
 
     ccache::Finalizer clenup_finalizer([&ctx] {
-        auto temporary_dir = ctx.temporary_dir();
-        if (fs::exists(temporary_dir)) {
-            std::error_code code;
-            fs::remove_all(temporary_dir, code);
+        fs::path temporary_dir_path(ctx.temporary_dir());
+        if (fs::exists(temporary_dir_path)) {
+            boost::system::error_code code;
+            fs::remove_all(temporary_dir_path, code);
             std::cout << "ccache: cleanup "
-                      << temporary_dir
+                      << temporary_dir_path
                       << " code "
                       << code
                       << std::endl;
