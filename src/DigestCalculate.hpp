@@ -14,12 +14,14 @@ extern "C" {
 };
 
 namespace ccache {
+class Config;
 class DigestCalculate {
   public:
-    DigestCalculate();
+    DigestCalculate(Config &config);
     ~DigestCalculate();
 
     void Init();
+    void UpdateCompileArgs(int argc, const char *const *argv);
     void Update(const void *data, size_t len);
     void Update(const std::string &content);
     void UpdateFormFile(const std::string &path);
@@ -29,6 +31,7 @@ class DigestCalculate {
     std::string Digest() { return m_digest; }
 
   private:
+    Config &m_config;
     std::string m_digest;
     EVP_MD_CTX *m_ctx{nullptr};
 };

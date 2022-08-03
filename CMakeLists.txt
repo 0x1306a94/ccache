@@ -6,10 +6,36 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(TARGAT_NAME "ccache")
 
+
+find_package(Git QUIET)
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+# Update submodules as needed
+    option(GIT_SUBMODULE "Check submodules during build" ON)
+    if(GIT_SUBMODULE)
+        message(STATUS "Submodule update")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        endif()
+    endif()
+endif()
+
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/third_party/yaml-cpp/CMakeLists.txt")
+    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+endif()
+
+
+set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Build tools for yaml-cpp" FORCE)
+set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries for yaml-cpp" FORCE)
+add_subdirectory(third_party/yaml-cpp)
+add_subdirectory(third_party/fmt)
+
 message("lib prefix: ${CMAKE_FIND_LIBRARY_PREFIXES}")
 message("lib suffix: ${CMAKE_FIND_LIBRARY_SUFFIXES}")
 
-file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp")
+file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 source_group("Header Files" ${HEADER_FILES})
@@ -17,13 +43,15 @@ source_group("Source Files" ${SOURCE_FILES})
 
 add_executable(${TARGAT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
+target_link_libraries(${TARGAT_NAME} yaml-cpp)
+target_link_libraries(${TARGAT_NAME} fmt)
 # set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 
 # set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf")
 
-target_include_directories(${TARGAT_NAME}
-                           PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
-
+target_include_directories(${TARGAT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(${TARGAT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/yaml-cpp/include")
+target_include_directories(${TARGAT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include")
 # icu4c
 # if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
 #   execute_process(

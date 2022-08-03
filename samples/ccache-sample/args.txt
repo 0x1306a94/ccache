@@ -1,0 +1,129 @@
+/usr/bin/clang -x objective-c -target x86_64-apple-ios15.5-simulator \
+-fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 \
+-std\=gnu11 -fobjc-arc -fobjc-weak -fmodules -gmodules \
+-fmodules-cache-path\=/Users/king/Library/Developer/Xcode/DerivedData/ModuleCache.noindex \
+-fmodules-prune-interval\=86400 -fmodules-prune-after\=345600 \
+-fbuild-session-file\=/Users/king/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation \
+-fmodules-validate-once-per-build-session -Wnon-modular-include-in-framework-module \
+-Werror\=non-modular-include-in-framework-module -Wno-trigraphs \
+-fpascal-strings -O0 -fno-common -Wno-missing-field-initializers \
+-Wno-missing-prototypes -Werror\=return-type -Wdocumentation -Wunreachable-code \
+-Wno-implicit-atomic-properties -Werror\=deprecated-objc-isa-usage \
+-Wno-objc-interface-ivars -Werror\=objc-root-class -Wno-arc-repeated-use-of-weak \
+-Wimplicit-retain-self -Wduplicate-method-match -Wno-missing-braces -Wparentheses \
+-Wswitch -Wunused-function -Wno-unused-label -Wno-unused-parameter -Wunused-variable \
+-Wunused-value -Wempty-body -Wuninitialized -Wconditional-uninitialized \
+-Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion \
+-Wconstant-conversion -Wint-conversion -Wbool-conversion -Wenum-conversion \
+-Wno-float-conversion -Wnon-literal-null-conversion -Wobjc-literal-conversion \
+-Wshorten-64-to-32 -Wpointer-sign -Wno-newline-eof -Wno-selector \
+-Wno-strict-selector-match -Wundeclared-selector -Wdeprecated-implementations \
+-DDEBUG\=1 -DCOCOAPODS\=1 -DDEBUG\=1 -DGPB_USE_PROTOBUF_FRAMEWORK_IMPORTS\=1 \
+-DDEBUG\=1 -DAS_USE_ASSETS_LIBRARY\=1 -DDEBUG\=1 -DAS_USE_MAPKIT\=1 -DDEBUG\=1 \
+-DAS_USE_PHOTOS\=1 -DDEBUG\=1 -DAS_USE_VIDEO\=1 -DOBJC_OLD_DISPATCH_PROTOTYPES\=0 \
+-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator15.5.sdk \
+-fasm-blocks -fstrict-aliasing -Wprotocol -Wdeprecated-declarations -g \
+-Wno-sign-conversion -Winfinite-recursion -Wcomma -Wblock-capture-autoreleasing \
+-Wstrict-prototypes -Wno-semicolon-before-method-body -Wunguarded-availability \
+-fobjc-abi-version\=2 -fobjc-legacy-dispatch \
+-index-store-path /Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Index/DataStore \
+-iquote /Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/ccache-sample-generated-files.hmap \
+-I/Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/ccache-sample-own-target-headers.hmap \
+-I/Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/ccache-sample-all-non-framework-target-headers.hmap \
+-ivfsoverlay /Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/all-product-headers.yaml \
+-iquote /Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/ccache-sample-project-headers.hmap \
+-I/Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Products/Debug-iphonesimulator/include -I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/AFNetworking \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/Aspects \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/BlocksKit \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/CYLTabBarController \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/ChameleonFramework \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/CocoaAsyncSocket \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/DZNEmptyDataSet \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/FLAnimatedImage \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/GPUImage \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/IGListDiffKit \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/IGListKit \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/IQKeyboardManager \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/JXCategoryView \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/JXPagingView \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/KTVCocoaHTTPServer \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/KTVHTTPCache \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/KVOController \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/MBProgressHUD \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/MGSwipeTableCell \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/MJRefresh \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/MagicalRecord \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/Masonry \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/PDTSimpleCalendar \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/PINCache \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/PINOperation \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/PINRemoteImage \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/Protobuf \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/QMUIKit \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/ReactiveObjC \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SDWebImage \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SDWebImageFLPlugin \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SSZipArchive \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SVGAPlayer \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SVProgressHUD \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/Texture \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/WebViewJavascriptBridge \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/YYModel \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/YYText \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/ZFPlayer \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/iOS-Category \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/lottie-ios \
+-I/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/pop \
+-I/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator15.5.sdk/usr/include/libxml2 \
+-I/Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/DerivedSources-normal/x86_64 \
+-I/Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/DerivedSources/x86_64 \
+-I/Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/DerivedSources \
+-F/Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Products/Debug-iphonesimulator \
+-fmodule-map-file\=/Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SSZipArchive/SSZipArchive.modulemap \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/AFNetworking \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/Aspects \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/BlocksKit \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/CYLTabBarController \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/ChameleonFramework \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/CocoaAsyncSocket \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/DZNEmptyDataSet \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/FLAnimatedImage \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/GPUImage \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/IGListDiffKit \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/IGListKit \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/IQKeyboardManager \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/JXCategoryView \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/JXPagingView \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/KTVCocoaHTTPServer \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/KTVHTTPCache \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/KVOController \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/MBProgressHUD \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/MGSwipeTableCell \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/MJRefresh \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/MagicalRecord \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/Masonry \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/PDTSimpleCalendar \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/PINCache \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/PINOperation \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/PINRemoteImage \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/Protobuf \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/QMUIKit \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/ReactiveObjC \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SDWebImage \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SDWebImageFLPlugin \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SSZipArchive \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SVGAPlayer \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/SVProgressHUD \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/Texture \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/WebViewJavascriptBridge \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/YYModel \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/YYText \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/ZFPlayer \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/iOS-Category \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/lottie-ios \
+-isystem /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/Pods/Headers/Public/pop \
+-MMD -MT dependencies -MF /Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/Objects-normal/x86_64/ViewController.d \
+--serialize-diagnostics /Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/Objects-normal/x86_64/ViewController.dia \
+-c /Users/king/WorkSpace/SourceCode/ccache/samples/ccache-sample/ccache-sample/ViewController.m -o /Users/king/Library/Developer/Xcode/DerivedData/ccache-sample-gdfyuxwqlnigqhaxszcsxbtlzgul/Build/Intermediates.noindex/ccache-sample.build/Debug-iphonesimulator/ccache-sample.build/Objects-normal/x86_64/ViewController.o

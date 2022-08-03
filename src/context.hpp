@@ -14,6 +14,8 @@ namespace ccache {
 class Args;
 class Context {
   public:
+    pid_t compiler_pid;
+
     Context(std::string cache_dir);
     ~Context();
 

@@ -8,9 +8,9 @@
 #include "context.hpp"
 
 #include <boost/algorithm/string.hpp>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
-namespace fs = std::filesystem;
+namespace fs = boost::filesystem;
 
 namespace ccache {
 Context::Context(std::string cache_dir)
@@ -18,6 +18,10 @@ Context::Context(std::string cache_dir)
     , m_apparent_cwd(getenv("PWD")) {
 
     m_temporary_dir = "/tmp/ccache";
+
+    if (!fs::exists(m_cache_dir)) {
+        fs::create_directory(m_cache_dir);
+    }
 
     if (!fs::exists(m_temporary_dir)) {
         fs::create_directory(m_temporary_dir);

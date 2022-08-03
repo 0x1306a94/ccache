@@ -7,6 +7,9 @@
 
 #include "DigestCalculate.hpp"
 
+#include "config.hpp"
+
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <iostream>
@@ -16,7 +19,8 @@ namespace fs = boost::filesystem;
 
 namespace ccache {
 
-DigestCalculate::DigestCalculate() {
+DigestCalculate::DigestCalculate(Config &config)
+    : m_config(config) {
     std::cout << __FUNCTION__ << std::endl;
 }
 
@@ -35,6 +39,18 @@ void DigestCalculate::Init() {
     }
     m_ctx = EVP_MD_CTX_new();
     EVP_DigestInit_ex(m_ctx, EVP_md5(), NULL);
+}
+
+void DigestCalculate::UpdateCompileArgs(int argc, const char *const *argv) {
+    for (int i = 0; i < argc; i++) {
+        std::string str = argv[i];
+        for (std::string &prefix : m_config.ignore_path_prefix) {
+            if (boost::contains(str, prefix)) {
+                boost::replace_all(str, prefix, "");
+            }
+        }
+        Update(str);
+    }
 }
 
 void DigestCalculate::Update(const void *data, size_t len) {

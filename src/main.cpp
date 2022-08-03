@@ -1,17 +1,20 @@
 
-#include <iostream>
-
 #include <execinfo.h>
+#include <iostream>
 #include <mach-o/dyld.h>
 #include <mach-o/loader.h>
 #include <signal.h>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "ccache.hpp"
+#include <yaml-cpp/yaml.h>
 
 #include "DigestCalculate.hpp"
+#include "ccache.hpp"
+#include "config.hpp"
+#include "env_key.h"
 
 void handler(int sig) {
 #define BACK_TRACE_DEPTH 512
@@ -54,14 +57,21 @@ int main(int argc, char *const *argv) {
     //
     //    std::cout << "md5: " << digestCalculate->Digest() << "\n";
 
-    //    execv(argv[1], (argv + 1));
-    //    char **clone_argv = (char **)malloc(sizeof(char **) * argc);
-    //    for (int i = 0; i < argc; i++) {
-    //        clone_argv[i] = strdup(argv[i]);
-    //    }
-    std::unique_ptr<ccache::CCache> cache = std::make_unique<ccache::CCache>();
+    const char *config_file_path = getenv(CCACHE_ENV_CONFIG_KEY);
+    if (config_file_path == NULL) {
+        std::cout << "Set the CCACHE_CONFIG environment variable first" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    ccache::Config config = YAML::LoadFile(config_file_path).as<ccache::Config>();
+    config.replace_environment_variables();
+    //    std::stringstream ss;
+    //    ss << YAML::Node(config);
+    //
+    //    std::cout << ss.str() << std::endl;
+
+    std::unique_ptr<ccache::CCache> cache = std::make_unique<ccache::CCache>(config);
     int result = cache->compilation(argc, argv);
-    //    free(clone_argv);
     return result;
 }
 
