@@ -207,7 +207,7 @@ void CCache::find_compiler(Context &ctx) {
 
 std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc, const char *const *argv) {
 
-    std::unique_ptr<DigestCalculate> digestCalculate(new DigestCalculate);
+    std::unique_ptr<DigestCalculate> digestCalculate = std::make_unique<DigestCalculate>();
     digestCalculate->Init();
 
     struct SkipArgsInfo {

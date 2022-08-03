@@ -59,7 +59,7 @@ int main(int argc, char *const *argv) {
     //    for (int i = 0; i < argc; i++) {
     //        clone_argv[i] = strdup(argv[i]);
     //    }
-    std::unique_ptr<ccache::CCache> cache(new ccache::CCache);
+    std::unique_ptr<ccache::CCache> cache = std::make_unique<ccache::CCache>();
     int result = cache->compilation(argc, argv);
     //    free(clone_argv);
     return result;
