@@ -216,8 +216,8 @@ struct XXHASH_IMP : Impl {
             return std::string();
         }
         XXH64_hash_t const hash = XXH64_digest(m_state);
-        XXH64_canonical_t dst;
-        XXH64_canonicalFromHash(&dst, hash);
+//        XXH64_canonical_t dst;
+//        XXH64_canonicalFromHash(&dst, hash);
         XXH64_freeState(m_state);
         m_state = NULL;
 
