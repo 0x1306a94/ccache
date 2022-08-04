@@ -169,11 +169,12 @@ elseif(USE_CACAHE_KEY_XXHASH)
       set(XXHASH_ROOT_DIR "${BREW_XXHASH_PREFIX}/")
       set(XXHASH_INCLUDE_DIR "${BREW_XXHASH_PREFIX}/include")
       set(XXHASH_LIBRARIES "${BREW_XXHASH_PREFIX}/lib")
-      set(XXHASH_LIBRARY "${BREW_XXHASH_PREFIX}/lib/libxxhash.a")
+      # set(XXHASH_LIBRARY "${BREW_XXHASH_PREFIX}/lib/libxxhash.a")
       # set(OPENSSL_USE_STATIC_LIBS TRUE)
     endif()
   endif()
 
+  find_library(XXHASH_LIBRARY NAMES xxhash REQUIRED)
   if(XXHASH_LIBRARY)
     message("xxhash_LIBS: " ${XXHASH_LIBRARY})
     # Add the include directories for compiling
