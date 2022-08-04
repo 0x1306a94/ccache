@@ -1,6 +1,6 @@
 file_storage:
   scheme: "file"
-  path: "/Users/${USER}/Documents/NFSD_WORK/ccache"
+  path: "/Users/${USER}/Work/NFSD_WORK/ccache_samples"
 
 # 当参数为路径时,需要忽略的前缀
 ignore_path_prefix:
@@ -9,3 +9,4 @@ ignore_path_prefix:
   - "/Users/${USER}/Library/Developer/Xcode/DerivedData"
 remove_path_prefix:
   - "/Users/${USER}/WorkSpace/SourceCode/ccache/samples"
+  - "/Users/${USER}/Work/NFSD_WORK/ccache/samples"
