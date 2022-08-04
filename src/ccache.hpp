@@ -13,7 +13,7 @@
 namespace ccache {
 
 class Config;
-class DigestCalculate;
+class KeyCalculate;
 class Context;
 
 class CCache {
@@ -34,8 +34,8 @@ class CCache {
 
     void initialize(Context &ctx, int argc, const char *const *argv);
 
-    void calculate_args_md5(Context &ctx, DigestCalculate &calculate);
-    bool calculate_dep_md5(DigestCalculate &calculate, const std::string &dep_file);
+    void calculate_args_md5(Context &ctx, KeyCalculate &calculate);
+    bool calculate_dep_md5(KeyCalculate &calculate, const std::string &dep_file);
 
     std::pair<bool, std::string> do_cache_compilation(Context &ctx, int argc, const char *const *argv);
 

@@ -1,24 +1,22 @@
 //
-//  DigestCalculate.hpp
+//  KeyCalculate.hpp
 //  ccache
 //
 //  Created by king on 2022/8/2.
 //
 
-#ifndef DigestCalculate_hpp
-#define DigestCalculate_hpp
+#ifndef KeyCalculate_hpp
+#define KeyCalculate_hpp
 
 #include <string>
-extern "C" {
-#include <openssl/evp.h>
-};
 
 namespace ccache {
 class Config;
-class DigestCalculate {
+class Impl;
+class KeyCalculate {
   public:
-    DigestCalculate(Config &config);
-    ~DigestCalculate();
+    KeyCalculate(Config &config);
+    ~KeyCalculate();
 
     void Init();
     void UpdateCompileArgs(int argc, const char *const *argv);
@@ -31,10 +29,10 @@ class DigestCalculate {
     std::string Digest() { return m_digest; }
 
   private:
+    std::unique_ptr<Impl> PImpl;
     Config &m_config;
     std::string m_digest;
-    EVP_MD_CTX *m_ctx{nullptr};
 };
 };     // namespace ccache
-#endif /* DigestCalculate_hpp */
+#endif /* KeyCalculate_hpp */
 

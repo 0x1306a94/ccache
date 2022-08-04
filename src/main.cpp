@@ -11,7 +11,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "DigestCalculate.hpp"
+#include "key_calculate.hpp"
 #include "ccache.hpp"
 #include "config.hpp"
 #include "env_key.h"
@@ -49,13 +49,13 @@ int main(int argc, char *const *argv) {
     signal(SIGSEGV, handler);
     signal(SIGSYS, handler);
 
-    //    std::unique_ptr<ccache::DigestCalculate> digestCalculate(new ccache::DigestCalculate);
-    //    digestCalculate->Init();
+    //    std::unique_ptr<ccache::KeyCalculate> KeyCalculate(new ccache::KeyCalculate);
+    //    KeyCalculate->Init();
     //
-    //    digestCalculate->Update("ccache");
-    //    digestCalculate->Final();
+    //    KeyCalculate->Update("ccache");
+    //    KeyCalculate->Final();
     //
-    //    std::cout << "md5: " << digestCalculate->Digest() << "\n";
+    //    std::cout << "md5: " << KeyCalculate->Digest() << "\n";
 
     const char *config_file_path = getenv(CCACHE_ENV_CONFIG_KEY);
     if (config_file_path == NULL) {

@@ -7,7 +7,6 @@
 
 #include "ccache.hpp"
 
-#include "DigestCalculate.hpp"
 #include "Finalizer.hpp"
 #include "Util.hpp"
 #include "config.hpp"
@@ -15,6 +14,7 @@
 #include "env_key.h"
 #include "execute.hpp"
 #include "fmtmacros.hpp"
+#include "key_calculate.hpp"
 #include "temporaryFile.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -216,7 +216,7 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
     return;
 }
 
-void CCache::calculate_args_md5(Context &ctx, DigestCalculate &calculate) {
+void CCache::calculate_args_md5(Context &ctx, KeyCalculate &calculate) {
 
     struct SkipArgsInfo {
         std::string prefix;
@@ -296,7 +296,7 @@ void CCache::calculate_args_md5(Context &ctx, DigestCalculate &calculate) {
     BOOST_LOG_TRIVIAL(trace) << md5_argv_stream.str();
 }
 
-bool CCache::calculate_dep_md5(DigestCalculate &calculate, const std::string &dep_file) {
+bool CCache::calculate_dep_md5(KeyCalculate &calculate, const std::string &dep_file) {
 
     BOOST_LOG_TRIVIAL(trace) << "read .d "
                              << dep_file;
@@ -415,8 +415,8 @@ do_execute(Context &ctx, Args &args, const bool capture_stdout = true) {
 
 std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc, const char *const *argv) {
 
-    std::unique_ptr<DigestCalculate> digestCalculate = std::make_unique<DigestCalculate>(m_config);
-    digestCalculate->Init();
+    std::unique_ptr<KeyCalculate> KeyCalculate = std::make_unique<ccache::KeyCalculate>(m_config);
+    KeyCalculate->Init();
 
     do {
         // 将编译器版本加入md5 计算
@@ -431,12 +431,12 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
             boost::split(res, result.stdout_data, boost::is_any_of("\n"));
             if (!res.empty()) {
                 const std::string compiler_version = res[0];
-                digestCalculate->Update(compiler_version);
+                KeyCalculate->Update(compiler_version);
             }
         }
     } while (0);
 
-    calculate_args_md5(ctx, *digestCalculate);
+    calculate_args_md5(ctx, *KeyCalculate);
 
     do {
         // 执行预处理, 同时生成 .d .dia 文件, 然后基于 .d 文件 以及源码文件 计算缓存的 key
@@ -451,18 +451,18 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         }
     } while (0);
 
-    if (!calculate_dep_md5(*digestCalculate, ctx.pre_args_info().output_dep)) {
+    if (!calculate_dep_md5(*KeyCalculate, ctx.pre_args_info().output_dep)) {
         return std::make_pair(false, std::string());
     };
 
     do {
         const std::string input_file = ctx.pre_args_info().input_file;
         BOOST_LOG_TRIVIAL(trace) << "md5 input_file " << input_file;
-        digestCalculate->UpdateFormFile(input_file);
+        KeyCalculate->UpdateFormFile(input_file);
     } while (0);
 
-    digestCalculate->Final();
-    std::string digest = digestCalculate->Digest();
+    KeyCalculate->Final();
+    std::string digest = KeyCalculate->Digest();
 
     BOOST_LOG_TRIVIAL(trace) << "cache key "
                              << digest;

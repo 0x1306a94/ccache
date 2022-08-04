@@ -1,0 +1,5 @@
+
+set(BLAKE3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PARENT_SCOPE)
+set(BLAKE3_LIBRARY "blake3" PARENT_SCOPE)
+
+# add_subdirectory(blake3)
