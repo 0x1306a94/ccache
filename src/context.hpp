@@ -14,9 +14,9 @@ namespace ccache {
 class Args;
 class Context {
   public:
-    pid_t compiler_pid;
+    pid_t compiler_pid{0};
 
-    Context(std::string cache_dir);
+    Context(std::string cache_dir, std::string log_dir, std::string build_id, std::string build_task_id);
     ~Context();
 
     std::string &temporary_dir() { return m_temporary_dir; }
@@ -41,6 +41,9 @@ class Context {
     }
 
     std::string &cache_dir() { return m_cache_dir; }
+    std::string &log_dir() { return m_log_dir; }
+    std::string &build_id() { return m_build_id; }
+    std::string &build_task_id() { return m_build_task_id; }
     ArgsInfo &orig_args_info() { return m_orig_args_info; }
     Args &orig_args() { return m_orig_args; }
 
@@ -57,6 +60,9 @@ class Context {
     ArgsInfo m_pre_args_info;
     Args m_pre_args;
     std::string m_cache_dir;
+    std::string m_log_dir;
+    std::string m_build_id;
+    std::string m_build_task_id;
 };
 };  // namespace ccache
 

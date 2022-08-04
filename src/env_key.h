@@ -9,5 +9,8 @@
 #define env_key_h
 
 #define CCACHE_ENV_CONFIG_KEY "CCACHE_CONFIG"
+#define LLBUILD_BUILD_ID_ENV_KEY "LLBUILD_BUILD_ID"
+#define LLBUILD_TASK_ID_ENV_KEY "LLBUILD_TASK_ID"
 
 #endif /* env_key_h */
+

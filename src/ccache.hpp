@@ -30,6 +30,8 @@ class CCache {
     int m_argc;
     char **m_argv{nullptr};
 
+    void init_log(Context &ctx);
+
     void initialize(Context &ctx, int argc, const char *const *argv);
 
     void calculate_args_md5(Context &ctx, DigestCalculate &calculate);

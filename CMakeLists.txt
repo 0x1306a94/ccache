@@ -90,7 +90,7 @@ endif()
 
 find_package(
   Boost
-  COMPONENTS system regex filesystem
+  COMPONENTS system regex filesystem log
   REQUIRED)
 if(Boost_FOUND)
   message(STATUS "Found Boost ${Boost_VERSION}")

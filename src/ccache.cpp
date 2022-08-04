@@ -12,6 +12,7 @@
 #include "Util.hpp"
 #include "config.hpp"
 #include "context.hpp"
+#include "env_key.h"
 #include "execute.hpp"
 #include "fmtmacros.hpp"
 #include "temporaryFile.hpp"
@@ -19,7 +20,22 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/log/attributes/named_scope.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/detail/format.hpp>
+#include <boost/log/detail/thread_id.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/sinks/text_ostream_backend.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
+#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/file.hpp>
 #include <boost/regex.hpp>
+
 #include <chrono>
 #include <errno.h>
 #include <fcntl.h>
@@ -47,6 +63,36 @@ CCache::CCache(Config &config)
 CCache::~CCache() {
 
     std::cout << __FUNCTION__ << std::endl;
+}
+
+void CCache::init_log(Context &ctx) {
+    namespace logging = boost::log;
+    namespace src = boost::log::sources;
+    namespace keywords = boost::log::keywords;
+    namespace sinks = boost::log::sinks;
+    namespace expr = boost::log::expressions;
+
+    auto log_file = FMT("{}/{}.log", ctx.log_dir(), ctx.build_task_id());
+
+    auto foramt = (expr::stream
+                   << "ccache: "
+                   << "[" << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
+                   //                            << " " << expr::attr<boost::log::aux::thread::id>("ThreadID")
+                   << " " << logging::trivial::severity
+                   << "] "
+                   << "" << expr::smessage);
+
+    auto sink = logging::add_file_log(
+        keywords::open_mode = std::ios::trunc,
+        keywords::file_name = log_file,
+        keywords::rotation_size = 10 * 1024 * 1024,
+        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+        keywords::format = foramt);
+
+    sink->locked_backend()->auto_flush(true);
+    sink->imbue(std::locale("zh_CN.UTF-8"));
+    logging::add_console_log(std::cout, keywords::format = foramt);
+    logging::add_common_attributes();
 }
 
 void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
@@ -98,10 +144,8 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
             auto input_file = argv[++i];
             orig_args_info.input_file = input_file;
 
-            std::cout << "ccache: "
-                      << "input_file "
-                      << input_file
-                      << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "input_file "
+                                     << input_file;
 
             //            pre_args.push_back("-fsyntax-only");
             pre_args.push_back("-E");
@@ -117,19 +161,15 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
             orig_args_info.output_dep = path_escape_dep;
             //            orig_args.push_back(path_escape_dep);
 
-            std::cout << "ccache: "
-                      << "old_output_dep "
-                      << orig_args_info.output_dep
-                      << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "old_output_dep "
+                                     << orig_args_info.output_dep;
 
             std::vector<std::string> res;
             boost::split(res, orig_args_info.output_dep, boost::is_any_of("/"));
             pre_output_dep = FMT("{}/{}", ctx.temporary_dir(), res.at(res.size() - 1));
 
-            std::cout << "ccache: "
-                      << "pre_output_dep "
-                      << pre_output_dep
-                      << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "pre_output_dep "
+                                     << pre_output_dep;
 
             pre_args.push_back(arg_item);
             pre_args.push_back(pre_output_dep);
@@ -143,19 +183,15 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
             orig_args_info.output_dia = path_escape_dia;
             //            orig_args.push_back(path_escape_dia);
 
-            std::cout << "ccache: "
-                      << "old_output_dia "
-                      << orig_args_info.output_dia
-                      << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "old_output_dia "
+                                     << orig_args_info.output_dia;
 
             std::vector<std::string> res;
             boost::split(res, orig_args_info.output_dia, boost::is_any_of("/"));
             pre_output_dia = FMT("{}/{}", ctx.temporary_dir(), res.at(res.size() - 1));
 
-            std::cout << "ccache: "
-                      << "pre_output_dia "
-                      << pre_output_dia
-                      << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "pre_output_dia "
+                                     << pre_output_dia;
 
             pre_args.push_back(arg_item);
             pre_args.push_back(pre_output_dia);
@@ -187,12 +223,16 @@ void CCache::calculate_args_md5(Context &ctx, DigestCalculate &calculate) {
 
     std::vector<SkipArgsInfo>
         skip_argv_infos{
-            //            {"-fmodules-cache-path"},
-            //            {"-fbuild-session-file"},
-            //            {"-index-store-path", true},
-            //            {"-iquote", true},
-            //            {"-I"},
-            //            {"-F"},
+            {"-fmodules-cache-path"},
+            {"-fbuild-session-file"},
+            {"-index-store-path", true},
+            {"-iquote", true},
+            {"-I"},
+            {"-isystem", true},
+            {"-F"},
+            {"-MMD"},
+            {"-MT"},
+            {"dependencies"},
             {"-MF", true},
             {"--serialize-diagnostics", true},
             {"-c", true},
@@ -201,18 +241,24 @@ void CCache::calculate_args_md5(Context &ctx, DigestCalculate &calculate) {
 
     std::vector<const char *> argv = ctx.orig_args().to_argv();
     size_t argc = argv.size();
+    std::stringstream full_argv_stream;
+    std::stringstream md5_argv_stream;
+    full_argv_stream << "full argv \n";
+    md5_argv_stream << "md5 argv \n";
     for (size_t i = 0; i < argc; i++) {
         const char *item = argv[i];
         if (item == nullptr) {
             continue;
         }
 
+        full_argv_stream << item << "\n";
         bool skip = false;
         for (SkipArgsInfo &skip_info : skip_argv_infos) {
-            if (strncmp(item, skip_info.prefix.c_str(), strlen(skip_info.prefix.c_str())) == 0) {
+            if (boost::starts_with(item, skip_info.prefix)) {
                 skip = true;
                 if (skip_info.next) {
                     i++;
+                    full_argv_stream << argv[i] << "\n";
                 }
                 break;
             }
@@ -239,16 +285,18 @@ void CCache::calculate_args_md5(Context &ctx, DigestCalculate &calculate) {
                 boost::replace_all(str, prefix, "");
             }
         }
-
+        md5_argv_stream << item << "\n";
         calculate.Update(str);
     }
+
+    BOOST_LOG_TRIVIAL(trace) << full_argv_stream.str();
+    BOOST_LOG_TRIVIAL(trace) << md5_argv_stream.str();
 }
 
 bool CCache::calculate_dep_md5(DigestCalculate &calculate, const std::string &dep_file) {
 
-    std::cout << "ccache: read .d\n"
-              << dep_file
-              << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << "read .d "
+                             << dep_file;
 
     std::ifstream ifs(dep_file, std::ios::in);
     if (!ifs.is_open()) {
@@ -278,19 +326,18 @@ bool CCache::calculate_dep_md5(DigestCalculate &calculate, const std::string &de
         if (fs::exists(path)) {
 
             const std::string filename = path.filename().string();
-
             calculate.Update(filename);
 
             if (boost::contains(fix_line, "/DerivedData/")) {
+                BOOST_LOG_TRIVIAL(trace) << "DerivedData " << fix_line;
                 // 自动生成的文件
                 calculate.UpdateFormFile(fix_line);
             } else {
                 auto time = fs::last_write_time(path);
                 const std::string milliseconds_str = FMT("{}", time);
-                //                    std::cout << "ccache: .d "
-                //                              << path.string() << " "
-                //                              << milliseconds_str
-                //                              << std::endl;
+                BOOST_LOG_TRIVIAL(trace) << ".d "
+                                         << path.string() << " "
+                                         << milliseconds_str;
                 calculate.Update(milliseconds_str);
             }
         }
@@ -387,12 +434,10 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
 
     do {
         // 执行预处理, 同时生成 .d .dia 文件, 然后基于 .d 文件 以及源码文件 计算缓存的 key
-        std::cout << "ccache: pre gen .d"
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "pre gen .d";
         auto result = do_execute(ctx, ctx.pre_args());
-        std::cout << "ccache: gen .d status_code "
-                  << result.exit_status
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "gen .d status_code "
+                                 << result.exit_status;
         if (result.exit_status != EXIT_SUCCESS) {
             Util::send_to_fd(result.stderr_data, STDERR_FILENO);
             Util::send_to_fd(result.stdout_data, STDOUT_FILENO);
@@ -406,15 +451,15 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
 
     do {
         const std::string input_file = ctx.pre_args_info().input_file;
+        BOOST_LOG_TRIVIAL(trace) << "md5 input_file " << input_file;
         digestCalculate->UpdateFormFile(input_file);
     } while (0);
 
     digestCalculate->Final();
     std::string digest = digestCalculate->Digest();
 
-    std::cout << "ccache: cache key "
-              << digest
-              << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << "cache key "
+                             << digest;
 
     ArgsInfo &orig_args_info = ctx.orig_args_info();
     ArgsInfo &pre_args_info = ctx.pre_args_info();
@@ -423,24 +468,22 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
     const std::string path = FMT("{}/{}", ctx.cache_dir(), digest);
     fs::path cache_file_path{path};
 
-    std::cout << "ccache: cache file "
-              << path
-              << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << "cache file "
+                             << path;
 
     boost::system::error_code code;
     if (fs::exists(cache_file_path, code)) {
-        std::cout << "ccache: Hit the cache" << std::endl;
-        std::cout << "ccache: cp " << cache_file_path.string() << " " << orig_args_info.output_obj << std::endl;
-        std::cout << "ccache: cp " << pre_args_info.output_dep << " " << orig_args_info.output_dep << std::endl;
-        std::cout << "ccache: cp " << pre_args_info.output_dia << " " << orig_args_info.output_dia << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "Hit the cache";
+        BOOST_LOG_TRIVIAL(trace) << "cp " << cache_file_path.string() << " " << orig_args_info.output_obj;
+        BOOST_LOG_TRIVIAL(trace) << "cp " << pre_args_info.output_dep << " " << orig_args_info.output_dep;
+        BOOST_LOG_TRIVIAL(trace) << "cp " << pre_args_info.output_dia << " " << orig_args_info.output_dia;
         fs::copy(cache_file_path, orig_args_info.output_obj, options);
         fs::copy(pre_args_info.output_dep, orig_args_info.output_dep, options);
         fs::copy(pre_args_info.output_dia, orig_args_info.output_dia, options);
         return std::make_pair(true, digest);
     } else {
-        std::cout << "ccache: cache file exists code "
-                  << code
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "cache file exists code "
+                                 << code;
     }
     return std::make_pair(false, digest);
 }
@@ -450,7 +493,14 @@ int CCache::compilation(int argc, const char *const *argv) {
         return EXIT_SUCCESS;
     }
 
-    Context ctx{m_config.file_storage.path};
+    const char *build_id = getenv(LLBUILD_BUILD_ID_ENV_KEY);
+    const char *build_task_id = getenv(LLBUILD_TASK_ID_ENV_KEY);
+    Context ctx{
+        m_config.file_storage.path,
+        m_config.log_dir,
+        build_id == NULL ? std::string() : std::string(build_id),
+        build_task_id == NULL ? std::string() : std::string(build_task_id),
+    };
 
     auto cur_duration = std::chrono::system_clock::now().time_since_epoch();
     auto mil = std::chrono::duration_cast<std::chrono::milliseconds>(cur_duration);
@@ -462,13 +512,15 @@ int CCache::compilation(int argc, const char *const *argv) {
         if (fs::exists(temporary_dir_path)) {
             boost::system::error_code code;
             fs::remove_all(temporary_dir_path, code);
-            std::cout << "ccache: cleanup "
-                      << temporary_dir_path
-                      << " code "
-                      << code
-                      << std::endl;
+
+            BOOST_LOG_TRIVIAL(trace) << "cleanup "
+                                     << temporary_dir_path
+                                     << " code "
+                                     << code;
         }
     });
+
+    init_log(ctx);
 
     initialize(ctx, argc, argv);
     find_compiler(ctx);
@@ -476,9 +528,8 @@ int CCache::compilation(int argc, const char *const *argv) {
     if (boost::ends_with(ctx.orig_args_info().input_file, ".pch") || boost::ends_with(ctx.orig_args_info().output_obj, ".gch")) {
 
         auto compile_result = do_execute(ctx, ctx.orig_args());
-        std::cout << "ccache: compile pch status_code "
-                  << compile_result.exit_status
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "compile pch status_code "
+                                 << compile_result.exit_status;
 
         Util::send_to_fd(compile_result.stderr_data, STDERR_FILENO);
         Util::send_to_fd(compile_result.stdout_data, STDOUT_FILENO);
@@ -495,13 +546,11 @@ int CCache::compilation(int argc, const char *const *argv) {
     ArgsInfo &orig_args_info = ctx.orig_args_info();
     ArgsInfo &pre_args_info = ctx.pre_args_info();
 
-    std::cout << "ccache: Missed cache"
-              << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << "Missed cache";
 
     auto compile_result = do_execute(ctx, ctx.orig_args());
-    std::cout << "ccache: compile exit code "
-              << compile_result.exit_status
-              << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << "compile exit code "
+                             << compile_result.exit_status;
 
     if (compile_result.exit_status != EXIT_SUCCESS) {
         Util::send_to_fd(compile_result.stderr_data, STDERR_FILENO);
@@ -509,38 +558,33 @@ int CCache::compilation(int argc, const char *const *argv) {
         return compile_result.exit_status;
     }
 
-    std::cout << "ccache: checking the build product "
-              << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << "checking the build product ";
     if (!fs::exists(orig_args_info.output_obj)) {
-        std::cout << "ccache: output_obj not exists "
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "output_obj not exists ";
         return EXIT_FAILURE;
     }
 
     if (!fs::exists(orig_args_info.output_dep)) {
-        std::cout << "ccache: output_dep not exists "
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "output_dep not exists ";
         return EXIT_FAILURE;
     }
 
     if (!fs::exists(orig_args_info.output_dia)) {
-        std::cout << "ccache: output_dia not exists "
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "output_dia not exists ";
         return EXIT_FAILURE;
     }
 
     if (cache_key.empty()) {
-        std::cout << "ccache: cache_key is empty "
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "cache_key is empty ";
         return EXIT_SUCCESS;
     }
 
-    std::cout << "ccache: Save the cache ..."
-              << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << "Save the cache ...";
     fs::copy_options options = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
     fs::path cache_file_path{FMT("{}/{}", ctx.cache_dir(), cache_key)};
     fs::copy(orig_args_info.output_obj, cache_file_path, options);
-    std::cout << "ccache: Save the cache " << cache_file_path.string() << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << "Save the cache "
+                             << cache_file_path.string();
     return EXIT_SUCCESS;
 }
 

@@ -57,7 +57,9 @@ void Config::replace_environment_variables() {
     }
 
     std::string file_storage_path = replace_ifneeded(file_storage.path);
+    std::string log_dir_path = replace_ifneeded(log_dir);
     this->file_storage.path = file_storage_path;
+    this->log_dir = log_dir_path;
     this->ignore_path_prefix = _ignore_path_prefix;
     this->remove_path_prefix = _remove_path_prefix;
 }
