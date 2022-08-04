@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(TARGAT_NAME "ccache")
 
 option(USE_CACAHE_KEY_OPENSSL_MD5 "Use OpenSSL MD5 for ccache key" OFF)
-option(USE_CACAHE_KEY_XXHASH "Use xxHash for ccache key" OFF)
+option(USE_CACAHE_KEY_XXHASH "Use xxHash for ccache key" ON)
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
