@@ -237,6 +237,7 @@ void CCache::calculate_args_md5(Context &ctx, DigestCalculate &calculate) {
             {"--serialize-diagnostics", true},
             {"-c", true},
             {"-o", true},
+            {"-include", true},
         };
 
     std::vector<const char *> argv = ctx.orig_args().to_argv();
@@ -285,7 +286,7 @@ void CCache::calculate_args_md5(Context &ctx, DigestCalculate &calculate) {
                 boost::replace_all(str, prefix, "");
             }
         }
-        md5_argv_stream << item << "\n";
+        md5_argv_stream << str << "\n";
         calculate.Update(str);
     }
 
@@ -333,12 +334,15 @@ bool CCache::calculate_dep_md5(DigestCalculate &calculate, const std::string &de
                 // 自动生成的文件
                 calculate.UpdateFormFile(fix_line);
             } else {
-                auto time = fs::last_write_time(path);
-                const std::string milliseconds_str = FMT("{}", time);
+                //                auto time = fs::last_write_time(path);
+                //                const std::string milliseconds_str = FMT("{}", time);
+                //                BOOST_LOG_TRIVIAL(trace) << ".d "
+                //                                         << path.string() << " "
+                //                                         << milliseconds_str;
+                //                calculate.Update(milliseconds_str);
                 BOOST_LOG_TRIVIAL(trace) << ".d "
-                                         << path.string() << " "
-                                         << milliseconds_str;
-                calculate.Update(milliseconds_str);
+                                         << path.string();
+                calculate.UpdateFormFile(path.string());
             }
         }
     }
