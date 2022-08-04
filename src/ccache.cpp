@@ -91,7 +91,9 @@ void CCache::init_log(Context &ctx) {
 
     sink->locked_backend()->auto_flush(true);
     sink->imbue(std::locale("zh_CN.UTF-8"));
-    logging::add_console_log(std::cout, keywords::format = foramt);
+    if (m_config.console_log) {
+        logging::add_console_log(std::cout, keywords::format = foramt);
+    }
     logging::add_common_attributes();
 }
 

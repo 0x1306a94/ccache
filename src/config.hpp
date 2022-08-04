@@ -22,6 +22,7 @@ struct Config {
     std::vector<std::string> ignore_path_prefix;
     std::vector<std::string> remove_path_prefix;
     std::string log_dir;
+    bool console_log{false};
     FileStorage file_storage;
 
     void replace_environment_variables();
@@ -53,6 +54,7 @@ struct convert<Config> {
         if (!rhs.log_dir.empty()) {
             node["log_dir"] = rhs.log_dir;
         }
+        node["console_log"] = rhs.console_log;
         return node;
     }
 
@@ -73,6 +75,10 @@ struct convert<Config> {
         Node log_dir_node = node["log_dir"];
         if (log_dir_node.IsDefined()) {
             config.log_dir = log_dir_node.as<std::string>();
+        }
+        Node console_log_node = node["console_log"];
+        if (console_log_node.IsDefined()) {
+            config.console_log = console_log_node.as<bool>();
         }
         return true;
     }
