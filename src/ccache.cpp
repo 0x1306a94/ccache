@@ -415,8 +415,8 @@ do_execute(Context &ctx, Args &args, const bool capture_stdout = true) {
 
 std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc, const char *const *argv) {
 
-    std::unique_ptr<KeyCalculate> KeyCalculate = std::make_unique<ccache::KeyCalculate>(m_config);
-    KeyCalculate->Init();
+    std::unique_ptr<KeyCalculate> keyCalculate = std::make_unique<ccache::KeyCalculate>(m_config);
+    keyCalculate->Init();
 
     do {
         // 将编译器版本加入md5 计算
@@ -431,12 +431,12 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
             boost::split(res, result.stdout_data, boost::is_any_of("\n"));
             if (!res.empty()) {
                 const std::string compiler_version = res[0];
-                KeyCalculate->Update(compiler_version);
+                keyCalculate->Update(compiler_version);
             }
         }
     } while (0);
 
-    calculate_args_md5(ctx, *KeyCalculate);
+    calculate_args_md5(ctx, *keyCalculate);
 
     do {
         // 执行预处理, 同时生成 .d .dia 文件, 然后基于 .d 文件 以及源码文件 计算缓存的 key
@@ -451,18 +451,18 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         }
     } while (0);
 
-    if (!calculate_dep_md5(*KeyCalculate, ctx.pre_args_info().output_dep)) {
+    if (!calculate_dep_md5(*keyCalculate, ctx.pre_args_info().output_dep)) {
         return std::make_pair(false, std::string());
     };
 
     do {
         const std::string input_file = ctx.pre_args_info().input_file;
         BOOST_LOG_TRIVIAL(trace) << "md5 input_file " << input_file;
-        KeyCalculate->UpdateFormFile(input_file);
+        keyCalculate->UpdateFormFile(input_file);
     } while (0);
 
-    KeyCalculate->Final();
-    std::string digest = KeyCalculate->Digest();
+    keyCalculate->Final();
+    std::string digest = keyCalculate->Digest();
 
     BOOST_LOG_TRIVIAL(trace) << "cache key "
                              << digest;

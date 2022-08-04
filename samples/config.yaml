@@ -2,6 +2,7 @@ file_storage:
   scheme: "file"
   path: "/Users/${USER}/Work/NFSD_WORK/ccache_samples"
 log_dir: "/Users/${USER}/Work/NFSD_WORK/ccache_sample_log"
+console_log: true
 # 当参数为路径时,需要忽略的前缀
 ignore_path_prefix:
   # - "/Applications/Xcode.app/Contents/Developer"

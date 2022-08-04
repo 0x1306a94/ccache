@@ -20,7 +20,7 @@ extern "C" {
 #if USE_CACAHE_KEY_OPENSSL_MD5
 #include <openssl/evp.h>
 #elif USE_CACAHE_KEY_XXHASH
-#include <xxh3.h>
+#include <xxhash.h>
 #endif
 };
 
@@ -221,12 +221,8 @@ struct XXHASH_IMP : Impl {
         XXH64_freeState(m_state);
         m_state = NULL;
 
-        char out[sizeof(XXH64_hash_t) + 1] = {'\0'};
-        for (int i = 0; i < sizeof(XXH64_hash_t); i++) {
-            sprintf(out + i * 2, "%02x", dst.digest[i]);
-        }
-
-        return std::string(out);
+        std::string hex = FMT("{:x}", hash);
+        return hex;
     }
 };
 #endif
