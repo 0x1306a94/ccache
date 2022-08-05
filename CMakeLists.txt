@@ -1,40 +1,38 @@
 cmake_minimum_required(VERSION 3.20.0)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+include(cmake/utils.cmake)
+
 project("ccache")
 
 set(CMAKE_CXX_STANDARD 17)
 
 set(CCACHE_TARGET_NAME "ccache")
 
+string(TIMESTAMP BUILD_DATE "%Y-%m-%d %H:%M:%S")
+message("Building date ${BUILD_DATE}")
+
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 1)
+message("Building version ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
+# 获取当前的GIT_HASH
+set(GIT_COMMIT "")
+get_git_hash(GIT_COMMIT)
+message(STATUS "Git commit is ${GIT_COMMIT}")
+
+# 获取当前的分支
+set(GIT_BRANCH "")
+get_git_branch(GIT_BRANCH)
+message(STATUS "Git branch is ${GIT_BRANCH}")
+
 option(USE_CACAHE_KEY_OPENSSL_MD5 "Use OpenSSL MD5 for ccache key" ON)
 option(USE_CACAHE_KEY_XXHASH "Use xxHash for ccache key" OFF)
 option(MTR_ENABLED "Enable mtr" OFF)
 
-find_package(Git QUIET)
-if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-  # Update submodules as needed
-  option(GIT_SUBMODULE "Check submodules during build" ON)
-  if(GIT_SUBMODULE)
-    message(STATUS "Submodule update")
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      RESULT_VARIABLE GIT_SUBMOD_RESULT)
-    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-      message(
-        FATAL_ERROR
-          "git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules"
-      )
-    endif()
-  endif()
-endif()
-
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/third_party/yaml-cpp/CMakeLists.txt")
-  message(
-    FATAL_ERROR
-      "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again."
-  )
-endif()
+git_submodule_check("${PROJECT_SOURCE_DIR}/third_party/yaml-cpp/CMakeLists.txt")
 
 set(YAML_CPP_BUILD_TOOLS
     OFF
@@ -45,11 +43,14 @@ set(YAML_BUILD_SHARED_LIBS
 add_subdirectory(third_party/yaml-cpp)
 add_subdirectory(third_party/fmt)
 
-message("lib prefix: ${CMAKE_FIND_LIBRARY_PREFIXES}")
-message("lib suffix: ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+# message("lib prefix: ${CMAKE_FIND_LIBRARY_PREFIXES}")
+
+# message("lib suffix: ${CMAKE_FIND_LIBRARY_SUFFIXES}")
 
 file(GLOB HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+     "${CMAKE_CURRENT_SOURCE_DIR}/configure/configure.h"
      "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
+
 file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 source_group("Header Files" ${HEADER_FILES})
@@ -70,40 +71,12 @@ target_include_directories(
   ${CCACHE_TARGET_NAME}
   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/yaml-cpp/include")
 target_include_directories(
-  ${CCACHE_TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include")
+  ${CCACHE_TARGET_NAME}
+  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include")
 target_include_directories(${CCACHE_TARGET_NAME}
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
-# icu4c
-
-# if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin") execute_process( COMMAND brew
-# --prefix icu4c RESULT_VARIABLE BREW_ICU4C OUTPUT_VARIABLE BREW_ICU4C_PREFIX
-# OUTPUT_STRIP_TRAILING_WHITESPACE) if(BREW_ICU4C EQUAL 0 AND EXISTS
-# "${BREW_ICU4C_PREFIX}") message(STATUS "Found icu4 keg installed by Homebrew
-# at ${BREW_ICU4C_PREFIX}") set(ICU4C_ROOT_DIR "${BREW_ICU4C_PREFIX}/")
-# set(ICU4C_INCLUDE_DIR "${BREW_ICU4C_PREFIX}/include") set(ICU4C_LIBRARIES
-# "${BREW_ICU4C_PREFIX}/lib")
-
-# target_link_directories(${TARGAT_NAME} PUBLIC ${ICU4C_LIBRARIES}) endif()
-# endif()
 
 # boost
-if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-  include(FindBoost)
-  # set(Boost_USE_STATIC_LIBS ON)
-  execute_process(
-    COMMAND brew --prefix boost
-    RESULT_VARIABLE BREW_BOOST
-    OUTPUT_VARIABLE BREW_BOOST_PREFIX
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if(BREW_BOOST EQUAL 0 AND EXISTS "${BREW_BOOST_PREFIX}")
-    message(
-      STATUS "Found Boost keg installed by Homebrew at ${BREW_BOOST_PREFIX}")
-    set(BOOST_ROOT_DIR "${BREW_BOOST_PREFIX}/")
-    set(BOOST_INCLUDE_DIR "${BREW_BOOST_PREFIX}/include")
-    set(BOOST_LIBRARIES "${BREW_BOOST_PREFIX}/lib")
-  endif()
-endif()
-
 find_package(
   Boost
   COMPONENTS system regex filesystem log
@@ -120,67 +93,34 @@ endif()
 
 if(USE_CACAHE_KEY_OPENSSL_MD5)
 
-  if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-    execute_process(
-      COMMAND brew --prefix OpenSSL
-      RESULT_VARIABLE BREW_OPENSSL
-      OUTPUT_VARIABLE BREW_OPENSSL_PREFIX
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(BREW_OPENSSL EQUAL 0 AND EXISTS "${BREW_OPENSSL_PREFIX}")
-      message(
-        STATUS
-          "Found OpenSSL keg installed by Homebrew at ${BREW_OPENSSL_PREFIX}")
-      set(OPENSSL_ROOT_DIR "${BREW_OPENSSL_PREFIX}/")
-      set(OPENSSL_INCLUDE_DIR "${BREW_OPENSSL_PREFIX}/include")
-      set(OPENSSL_LIBRARIES "${BREW_OPENSSL_PREFIX}/lib")
-      # set(OPENSSL_CRYPTO_LIBRARY "${BREW_OPENSSL_PREFIX}/lib/libcrypto.dylib")
-      # set(OPENSSL_USE_STATIC_LIBS TRUE)
-    endif()
-  endif()
-
+  find_homebrew_openssl()
   find_package(OpenSSL REQUIRED)
   if(OPENSSL_FOUND)
     message("openssl_LIBS: " ${OPENSSL_CRYPTO_LIBRARY})
     # Add the include directories for compiling
-    target_include_directories(${CCACHE_TARGET_NAME} PUBLIC ${OPENSSL_INCLUDE_DIR})
+    target_include_directories(${CCACHE_TARGET_NAME}
+                               PUBLIC ${OPENSSL_INCLUDE_DIR})
     target_link_libraries(${CCACHE_TARGET_NAME} ${OPENSSL_CRYPTO_LIBRARY})
     message(STATUS "Found OpenSSL ${OPENSSL_VERSION}")
   else()
     message(FATAL_ERROR "OpenSSL Not Found")
   endif()
-  # target_compile_options(${CCACHE_TARGET_NAME} PUBLIC "-DUSE_CACAHE_KEY_OPENSSL_MD5=1")
 
 elseif(USE_CACAHE_KEY_XXHASH)
 
-  if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
-    execute_process(
-      COMMAND brew --prefix xxhash
-      RESULT_VARIABLE BREW_XXHASH
-      OUTPUT_VARIABLE BREW_XXHASH_PREFIX
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(BREW_XXHASH EQUAL 0 AND EXISTS "${BREW_XXHASH_PREFIX}")
-      message(
-        STATUS "Found xxhash keg installed by Homebrew at ${BREW_XXHASH_PREFIX}"
-      )
-      set(XXHASH_ROOT_DIR "${BREW_XXHASH_PREFIX}/")
-      set(XXHASH_INCLUDE_DIR "${BREW_XXHASH_PREFIX}/include")
-      set(XXHASH_LIBRARIES "${BREW_XXHASH_PREFIX}/lib")
-      # set(XXHASH_LIBRARY "${BREW_XXHASH_PREFIX}/lib/libxxhash.a")
-      # set(OPENSSL_USE_STATIC_LIBS TRUE)
-    endif()
-  endif()
+  find_homebrew_xxhash()
 
   find_library(XXHASH_LIBRARY NAMES xxhash REQUIRED)
   if(XXHASH_LIBRARY)
     message("xxhash_LIBS: " ${XXHASH_LIBRARY})
     # Add the include directories for compiling
-    target_include_directories(${CCACHE_TARGET_NAME} PUBLIC ${XXHASH_INCLUDE_DIR})
+    target_include_directories(${CCACHE_TARGET_NAME}
+                               PUBLIC ${XXHASH_INCLUDE_DIR})
     target_link_libraries(${CCACHE_TARGET_NAME} ${XXHASH_LIBRARY})
     message(STATUS "Found xxhash")
   else()
     message(FATAL_ERROR "xxhash Not Found")
   endif()
-  # target_compile_options(${CCACHE_TARGET_NAME} PUBLIC "-DUSE_CACAHE_KEY_XXHASH=1")
 
 endif()
 
@@ -199,4 +139,5 @@ endif()
 configure_file("${PROJECT_SOURCE_DIR}/configure/configure.h.in"
                "${PROJECT_SOURCE_DIR}/configure/configure.h" @ONLY)
 
-target_include_directories(${CCACHE_TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/configure")
+target_include_directories(${CCACHE_TARGET_NAME}
+                           PUBLIC "${PROJECT_SOURCE_DIR}/configure")

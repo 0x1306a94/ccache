@@ -10,13 +10,13 @@
 #include "Finalizer.hpp"
 #include "Util.hpp"
 #include "config.hpp"
+#include "configure.h"
 #include "context.hpp"
 #include "env_key.h"
 #include "execute.hpp"
 #include "fmtmacros.hpp"
 #include "key_calculate.hpp"
 #include "temporaryFile.hpp"
-#include "configure.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -540,6 +540,19 @@ int CCache::compilation(int argc, const char *const *argv) {
 	});
 
 	init_log(ctx);
+
+	BOOST_LOG_TRIVIAL(info) << "Version "
+	                        << CCACHE_VERSION_FULL;
+
+	BOOST_LOG_TRIVIAL(info) << "Build date "
+	                        << CCACHE_BUILD_DATE;
+
+	BOOST_LOG_TRIVIAL(info) << "git branch "
+	                        << CCACHE_GIT_BRANCH;
+
+	BOOST_LOG_TRIVIAL(info) << "git commit "
+	                        << CCACHE_GIT_COMMIT;
+
 	if (getenv(CCACHE_INTERNAL_TRACE_ENV_KEY) != NULL) {
 #if defined(MTR_ENABLED)
 		if (ctx.log_dir().empty()) {
