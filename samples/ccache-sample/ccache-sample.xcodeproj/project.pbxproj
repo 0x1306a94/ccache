@@ -20,6 +20,7 @@
 /* Begin PBXFileReference section */
 		1FC0B7B52EC49B34A95DC8FD /* Pods-ccache-sample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ccache-sample.release.xcconfig"; path = "Target Support Files/Pods-ccache-sample/Pods-ccache-sample.release.xcconfig"; sourceTree = "<group>"; };
 		3C7A27B52898FC4B0098290F /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Config.xcconfig; path = "ccache-sample/Config.xcconfig"; sourceTree = "<group>"; };
+		3C7F51B6289CC35600AB3470 /* config.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; name = config.yaml; path = ../config.yaml; sourceTree = "<group>"; };
 		3CAE28C12898D19E003F03E5 /* ccache-sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ccache-sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3CAE28C42898D19E003F03E5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		3CAE28C52898D19E003F03E5 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -52,6 +53,7 @@
 			isa = PBXGroup;
 			children = (
 				3C7A27B52898FC4B0098290F /* Config.xcconfig */,
+				3C7F51B6289CC35600AB3470 /* config.yaml */,
 				3CAE28C32898D19E003F03E5 /* ccache-sample */,
 				3CAE28C22898D19E003F03E5 /* Products */,
 				5F741CB8448A8001B95B5946 /* Pods */,
