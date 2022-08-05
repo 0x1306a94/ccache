@@ -23,6 +23,8 @@ struct Config {
     std::vector<std::string> remove_path_prefix;
     std::string log_dir;
     bool console_log{false};
+    bool key_by_content{false};
+    bool key_by_time{true};
     FileStorage file_storage;
 
     void replace_environment_variables();
@@ -55,6 +57,8 @@ struct convert<Config> {
             node["log_dir"] = rhs.log_dir;
         }
         node["console_log"] = rhs.console_log;
+        node["key_by_content"] = rhs.key_by_content;
+        node["key_by_time"] = rhs.key_by_time;
         return node;
     }
 
@@ -79,6 +83,16 @@ struct convert<Config> {
         Node console_log_node = node["console_log"];
         if (console_log_node.IsDefined()) {
             config.console_log = console_log_node.as<bool>();
+        }
+
+        Node key_by_content_node = node["key_by_content"];
+        if (key_by_content_node.IsDefined()) {
+            config.key_by_content = key_by_content_node.as<bool>();
+        }
+
+        Node key_by_time_node = node["key_by_time"];
+        if (key_by_time_node.IsDefined()) {
+            config.key_by_time = key_by_time_node.as<bool>();
         }
         return true;
     }

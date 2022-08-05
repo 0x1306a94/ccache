@@ -338,15 +338,18 @@ bool CCache::calculate_dep_key(KeyCalculate &calculate, const std::string &dep_f
                 // 自动生成的文件
                 calculate.UpdateFormFile(fix_line);
             } else {
-                //                auto time = fs::last_write_time(path);
-                //                const std::string milliseconds_str = FMT("{}", time);
-                //                BOOST_LOG_TRIVIAL(trace) << ".d "
-                //                                         << path.string() << " "
-                //                                         << milliseconds_str;
-                //                calculate.Update(milliseconds_str);
-                BOOST_LOG_TRIVIAL(trace) << ".d "
-                                         << path.string();
-                calculate.UpdateFormFile(path.string());
+                if (m_config.key_by_content) {
+                    BOOST_LOG_TRIVIAL(trace) << ".d content "
+                                             << path.string();
+                    calculate.UpdateFormFile(path.string());
+                } else if (m_config.key_by_time) {
+                    auto time = fs::last_write_time(path);
+                    const std::string milliseconds_str = FMT("{}", time);
+                    BOOST_LOG_TRIVIAL(trace) << ".d time "
+                                             << path.string() << " "
+                                             << milliseconds_str;
+                    calculate.Update(milliseconds_str);
+                }
             }
             MTR_END("calculate_key_dep", fix_line.c_str());
         }
