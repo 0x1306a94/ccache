@@ -5,14 +5,17 @@
 //  Created by king on 2022/8/5.
 //
 
-#ifdef MTR_ENABLED
-
 #include "MiniTrace.hpp"
+
+#if defined(MTR_ENABLED)
+
 #include "context.hpp"
 #include "fmtmacros.hpp"
 
 #include <chrono>
 #include <unistd.h>
+
+#include <boost/filesystem.hpp>
 
 namespace ccache {
 MiniTrace::MiniTrace(Context &ctx)
@@ -22,9 +25,9 @@ MiniTrace::MiniTrace(Context &ctx)
     mtr_init(m_trace_file.c_str());
     auto cur_duration = std::chrono::system_clock::now().time_since_epoch();
     auto mil = std::chrono::duration_cast<std::chrono::milliseconds>(cur_duration);
-	m_start_time = FMT("{}", mil.count());
-	MTR_INSTANT_C("", "", "time", m_start_time.c_str());
-	MTR_META_PROCESS_NAME("ccache");
+    m_start_time = FMT("{}", mil.count());
+    MTR_INSTANT_C("", "", "time", m_start_time.c_str());
+    MTR_META_PROCESS_NAME("ccache");
     MTR_START("program", "ccache", m_trace_id);
 }
 

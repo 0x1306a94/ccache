@@ -10,7 +10,9 @@
 
 #include <minitrace/minitrace.h>
 
-#ifdef MTR_ENABLED
+#include "configure.h"
+
+#if defined(MTR_ENABLED)
 
 #include <string>
 

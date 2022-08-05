@@ -8,6 +8,7 @@
 #include "key_calculate.hpp"
 
 #include "config.hpp"
+#include "configure.h"
 #include "fmtmacros.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -17,9 +18,9 @@
 #include <sstream>
 #include <stdlib.h>
 extern "C" {
-#if USE_CACAHE_KEY_OPENSSL_MD5
+#if defined(USE_CACAHE_KEY_OPENSSL_MD5)
 #include <openssl/evp.h>
-#elif USE_CACAHE_KEY_XXHASH
+#elif defined(USE_CACAHE_KEY_XXHASH)
 #include <xxhash.h>
 #endif
 };
@@ -109,7 +110,7 @@ void KeyCalculate::Final() {
     m_digest = PImpl->Final();
 }
 
-#if USE_CACAHE_KEY_OPENSSL_MD5
+#if defined(USE_CACAHE_KEY_OPENSSL_MD5)
 struct OPENSSL_MD5_IMP : Impl {
     EVP_MD_CTX *m_ctx{nullptr};
 
@@ -163,7 +164,7 @@ struct OPENSSL_MD5_IMP : Impl {
         return std::string{out};
     }
 };
-#elif USE_CACAHE_KEY_XXHASH
+#elif defined(USE_CACAHE_KEY_XXHASH)
 struct XXHASH_IMP : Impl {
     XXH64_state_t *m_state{NULL};
     ~XXHASH_IMP() {
@@ -216,8 +217,8 @@ struct XXHASH_IMP : Impl {
             return std::string();
         }
         XXH64_hash_t const hash = XXH64_digest(m_state);
-//        XXH64_canonical_t dst;
-//        XXH64_canonicalFromHash(&dst, hash);
+        //        XXH64_canonical_t dst;
+        //        XXH64_canonicalFromHash(&dst, hash);
         XXH64_freeState(m_state);
         m_state = NULL;
 
@@ -229,9 +230,9 @@ struct XXHASH_IMP : Impl {
 
 std::unique_ptr<Impl>
 Impl::CreateImpl() {
-#if USE_CACAHE_KEY_OPENSSL_MD5
+#if defined(USE_CACAHE_KEY_OPENSSL_MD5)
     return std::make_unique<OPENSSL_MD5_IMP>();
-#elif USE_CACAHE_KEY_XXHASH
+#elif defined(USE_CACAHE_KEY_XXHASH)
     return std::make_unique<XXHASH_IMP>();
 #endif
 }

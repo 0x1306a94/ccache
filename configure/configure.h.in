@@ -1,0 +1,12 @@
+// 使用OpenSSL库计算缓存key
+#cmakedefine USE_CACAHE_KEY_OPENSSL_MD5
+
+// 使用XXHash库计算缓存key
+#cmakedefine USE_CACAHE_KEY_XXHASH
+
+#if !defined(MTR_ENABLED)
+// 启用trace功能
+#cmakedefine MTR_ENABLED
+#endif
+
+#define CCACHE_MACOSX_PLATFORM @CCACHE_MACOSX_PLATFORM@

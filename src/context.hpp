@@ -10,8 +10,13 @@
 
 #include "ArgsInfo.hpp"
 #include "MiniTrace.hpp"
+#include "configure.h"
 
+#include <boost/filesystem.hpp>
 namespace ccache {
+
+namespace fs = boost::filesystem;
+
 class Args;
 
 class Context {
@@ -21,7 +26,7 @@ class Context {
     Context(std::string cache_dir, std::string log_dir, std::string build_id, std::string build_task_id);
     ~Context();
 
-    std::string &temporary_dir() { return m_temporary_dir; }
+    std::string temporary_dir() { return m_temporary_dir.string(); }
     std::string &apparent_cwd() { return m_apparent_cwd; }
 
     void append_temporary_dir(std::string &str);
@@ -42,8 +47,8 @@ class Context {
         m_pre_args_info = args_info;
     }
 
-    std::string &cache_dir() { return m_cache_dir; }
-    std::string &log_dir() { return m_log_dir; }
+    std::string cache_dir() { return m_cache_dir.string(); }
+    std::string log_dir() { return m_log_dir.string(); }
     std::string &build_id() { return m_build_id; }
     std::string &build_task_id() { return m_build_task_id; }
     ArgsInfo &orig_args_info() { return m_orig_args_info; }
@@ -52,11 +57,11 @@ class Context {
     ArgsInfo &pre_args_info() { return m_pre_args_info; }
     Args &pre_args() { return m_pre_args; }
 
-#ifdef MTR_ENABLED
+#if defined(MTR_ENABLED)
     std::unique_ptr<MiniTrace> mini_trace;
 #endif
   private:
-    std::string m_temporary_dir;
+    fs::path m_temporary_dir;
     std::string m_apparent_cwd;
 
     ArgsInfo m_orig_args_info;
@@ -64,8 +69,8 @@ class Context {
 
     ArgsInfo m_pre_args_info;
     Args m_pre_args;
-    std::string m_cache_dir;
-    std::string m_log_dir;
+    fs::path m_cache_dir;
+    fs::path m_log_dir;
     std::string m_build_id;
     std::string m_build_task_id;
 };

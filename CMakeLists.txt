@@ -4,7 +4,7 @@ project("ccache")
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(TARGAT_NAME "ccache")
+set(CCACHE_TARGET_NAME "ccache")
 
 option(USE_CACAHE_KEY_OPENSSL_MD5 "Use OpenSSL MD5 for ccache key" ON)
 option(USE_CACAHE_KEY_XXHASH "Use xxHash for ccache key" OFF)
@@ -55,23 +55,23 @@ file(GLOB SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 source_group("Header Files" ${HEADER_FILES})
 source_group("Source Files" ${SOURCE_FILES})
 
-add_executable(${TARGAT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${CCACHE_TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
-target_link_libraries(${TARGAT_NAME} yaml-cpp)
-target_link_libraries(${TARGAT_NAME} fmt)
+target_link_libraries(${CCACHE_TARGET_NAME} yaml-cpp)
+target_link_libraries(${CCACHE_TARGET_NAME} fmt)
 
 # set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 
 # set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf")
 
-target_include_directories(${TARGAT_NAME}
+target_include_directories(${CCACHE_TARGET_NAME}
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(
-  ${TARGAT_NAME}
+  ${CCACHE_TARGET_NAME}
   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/yaml-cpp/include")
 target_include_directories(
-  ${TARGAT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include")
-target_include_directories(${TARGAT_NAME}
+  ${CCACHE_TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include")
+target_include_directories(${CCACHE_TARGET_NAME}
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 # icu4c
 
@@ -112,10 +112,8 @@ if(Boost_FOUND)
   message(STATUS "Found Boost ${Boost_VERSION}")
   message("boost_LIBS: " ${Boost_LIBRARIES})
   # Add the include directories for compiling
-  target_include_directories(${TARGAT_NAME} PUBLIC ${BOOST_INCLUDE_DIR})
-  # Add the static lib for linking target_link_directories(${TARGAT_NAME} PUBLIC
-  # ${BOOST_LIBRARIES})
-  target_link_libraries(${TARGAT_NAME} ${Boost_LIBRARIES})
+  target_include_directories(${CCACHE_TARGET_NAME} PUBLIC ${BOOST_INCLUDE_DIR})
+  target_link_libraries(${CCACHE_TARGET_NAME} ${Boost_LIBRARIES})
 else()
   message(FATAL_ERROR "Boost Not Found")
 endif()
@@ -144,15 +142,13 @@ if(USE_CACAHE_KEY_OPENSSL_MD5)
   if(OPENSSL_FOUND)
     message("openssl_LIBS: " ${OPENSSL_CRYPTO_LIBRARY})
     # Add the include directories for compiling
-    target_include_directories(${TARGAT_NAME} PUBLIC ${OPENSSL_INCLUDE_DIR})
-    # Add the static lib for linking target_link_directories(${TARGAT_NAME}
-    # PUBLIC ${OPENSSL_LIBRARIES})
-    target_link_libraries(${TARGAT_NAME} ${OPENSSL_CRYPTO_LIBRARY})
+    target_include_directories(${CCACHE_TARGET_NAME} PUBLIC ${OPENSSL_INCLUDE_DIR})
+    target_link_libraries(${CCACHE_TARGET_NAME} ${OPENSSL_CRYPTO_LIBRARY})
     message(STATUS "Found OpenSSL ${OPENSSL_VERSION}")
   else()
     message(FATAL_ERROR "OpenSSL Not Found")
   endif()
-  target_compile_options(${TARGAT_NAME} PUBLIC "-DUSE_CACAHE_KEY_OPENSSL_MD5=1")
+  # target_compile_options(${CCACHE_TARGET_NAME} PUBLIC "-DUSE_CACAHE_KEY_OPENSSL_MD5=1")
 
 elseif(USE_CACAHE_KEY_XXHASH)
 
@@ -178,27 +174,29 @@ elseif(USE_CACAHE_KEY_XXHASH)
   if(XXHASH_LIBRARY)
     message("xxhash_LIBS: " ${XXHASH_LIBRARY})
     # Add the include directories for compiling
-    target_include_directories(${TARGAT_NAME} PUBLIC ${XXHASH_INCLUDE_DIR})
-    # Add the static lib for linking target_link_directories(${TARGAT_NAME}
-    # PUBLIC ${OPENSSL_LIBRARIES})
-    target_link_libraries(${TARGAT_NAME} ${XXHASH_LIBRARY})
+    target_include_directories(${CCACHE_TARGET_NAME} PUBLIC ${XXHASH_INCLUDE_DIR})
+    target_link_libraries(${CCACHE_TARGET_NAME} ${XXHASH_LIBRARY})
     message(STATUS "Found xxhash")
   else()
     message(FATAL_ERROR "xxhash Not Found")
   endif()
-  target_compile_options(${TARGAT_NAME} PUBLIC "-DUSE_CACAHE_KEY_XXHASH=1")
+  # target_compile_options(${CCACHE_TARGET_NAME} PUBLIC "-DUSE_CACAHE_KEY_XXHASH=1")
 
 endif()
 
 if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
   # set(CMAKE_OSX_ARCHITECTURES arm64;x86_64) message(STATUS "archs:
-  # ${CMAKE_OSX_ARCHITECTURES}")
-  target_compile_options(${TARGAT_NAME} PUBLIC "-DCCACHE_MACOSX_PLATFORM=1")
+  set(CCACHE_MACOSX_PLATFORM 1)
 endif()
 
 if(MTR_ENABLED)
   add_subdirectory(third_party/minitrace)
-  target_link_libraries(${TARGAT_NAME} minitrace)
-  target_compile_options(${TARGAT_NAME} PUBLIC "-DMTR_ENABLED")
-  target_compile_definitions(minitrace PUBLIC "-DMTR_COPY_EVENT_CATEGORY_AND_NAME")
+  target_link_libraries(${CCACHE_TARGET_NAME} minitrace)
+  target_compile_definitions(minitrace
+                             PUBLIC "-DMTR_COPY_EVENT_CATEGORY_AND_NAME")
 endif()
+
+configure_file("${PROJECT_SOURCE_DIR}/configure/configure.h.in"
+               "${PROJECT_SOURCE_DIR}/configure/configure.h" @ONLY)
+
+target_include_directories(${CCACHE_TARGET_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/configure")
