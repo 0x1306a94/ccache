@@ -8,6 +8,7 @@ set(TARGAT_NAME "ccache")
 
 option(USE_CACAHE_KEY_OPENSSL_MD5 "Use OpenSSL MD5 for ccache key" OFF)
 option(USE_CACAHE_KEY_XXHASH "Use xxHash for ccache key" ON)
+option(MTR_ENABLED "Enable mtr" OFF)
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -59,8 +60,6 @@ add_executable(${TARGAT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(${TARGAT_NAME} yaml-cpp)
 target_link_libraries(${TARGAT_NAME} fmt)
 
-add_subdirectory(third_party)
-
 # set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 
 # set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf")
@@ -72,7 +71,8 @@ target_include_directories(
   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/yaml-cpp/include")
 target_include_directories(
   ${TARGAT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include")
-
+target_include_directories(${TARGAT_NAME}
+                           PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 # icu4c
 
 # if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin") execute_process( COMMAND brew
@@ -194,4 +194,11 @@ if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
   # set(CMAKE_OSX_ARCHITECTURES arm64;x86_64) message(STATUS "archs:
   # ${CMAKE_OSX_ARCHITECTURES}")
   target_compile_options(${TARGAT_NAME} PUBLIC "-DCCACHE_MACOSX_PLATFORM=1")
+endif()
+
+if(MTR_ENABLED)
+  add_subdirectory(third_party/minitrace)
+  target_link_libraries(${TARGAT_NAME} minitrace)
+  target_compile_options(${TARGAT_NAME} PUBLIC "-DMTR_ENABLED")
+  target_compile_definitions(minitrace PUBLIC "-DMTR_COPY_EVENT_CATEGORY_AND_NAME")
 endif()

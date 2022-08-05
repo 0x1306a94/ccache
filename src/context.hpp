@@ -9,9 +9,11 @@
 #define Context_hpp
 
 #include "ArgsInfo.hpp"
+#include "MiniTrace.hpp"
 
 namespace ccache {
 class Args;
+
 class Context {
   public:
     pid_t compiler_pid{0};
@@ -50,6 +52,9 @@ class Context {
     ArgsInfo &pre_args_info() { return m_pre_args_info; }
     Args &pre_args() { return m_pre_args; }
 
+#ifdef MTR_ENABLED
+    std::unique_ptr<MiniTrace> mini_trace;
+#endif
   private:
     std::string m_temporary_dir;
     std::string m_apparent_cwd;

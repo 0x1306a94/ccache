@@ -4,3 +4,6 @@
 [submodule "third_party/fmt"]
 	path = third_party/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "third_party/minitrace"]
+	path = third_party/minitrace
+	url = https://github.com/hrydgard/minitrace.git

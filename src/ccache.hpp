@@ -34,8 +34,8 @@ class CCache {
 
     void initialize(Context &ctx, int argc, const char *const *argv);
 
-    void calculate_args_md5(Context &ctx, KeyCalculate &calculate);
-    bool calculate_dep_md5(KeyCalculate &calculate, const std::string &dep_file);
+    void calculate_args_key(Context &ctx, KeyCalculate &calculate);
+    bool calculate_dep_key(KeyCalculate &calculate, const std::string &dep_file);
 
     std::pair<bool, std::string> do_cache_compilation(Context &ctx, int argc, const char *const *argv);
 

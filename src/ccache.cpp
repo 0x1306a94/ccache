@@ -216,7 +216,7 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
     return;
 }
 
-void CCache::calculate_args_md5(Context &ctx, KeyCalculate &calculate) {
+void CCache::calculate_args_key(Context &ctx, KeyCalculate &calculate) {
 
     struct SkipArgsInfo {
         std::string prefix;
@@ -245,9 +245,9 @@ void CCache::calculate_args_md5(Context &ctx, KeyCalculate &calculate) {
     std::vector<const char *> argv = ctx.orig_args().to_argv();
     size_t argc = argv.size();
     std::stringstream full_argv_stream;
-    std::stringstream md5_argv_stream;
+    std::stringstream key_argv_stream;
     full_argv_stream << "full argv \n";
-    md5_argv_stream << "md5 argv \n";
+    key_argv_stream << "key argv \n";
     for (size_t i = 0; i < argc; i++) {
         const char *item = argv[i];
         if (item == nullptr) {
@@ -288,15 +288,15 @@ void CCache::calculate_args_md5(Context &ctx, KeyCalculate &calculate) {
                 boost::replace_all(str, prefix, "");
             }
         }
-        md5_argv_stream << str << "\n";
+        key_argv_stream << str << "\n";
         calculate.Update(str);
     }
 
     BOOST_LOG_TRIVIAL(trace) << full_argv_stream.str();
-    BOOST_LOG_TRIVIAL(trace) << md5_argv_stream.str();
+    BOOST_LOG_TRIVIAL(trace) << key_argv_stream.str();
 }
 
-bool CCache::calculate_dep_md5(KeyCalculate &calculate, const std::string &dep_file) {
+bool CCache::calculate_dep_key(KeyCalculate &calculate, const std::string &dep_file) {
 
     BOOST_LOG_TRIVIAL(trace) << "read .d "
                              << dep_file;
@@ -306,11 +306,13 @@ bool CCache::calculate_dep_md5(KeyCalculate &calculate, const std::string &dep_f
         return false;
     }
 
+    MTR_SCOPE("calculate_key_dep", "calculate_key_dep");
+
     std::string line;
     while (getline(ifs, line)) {
 
         std::string fix_line{line};
-        //            std::cout << "line: " << fix_line << "\n";
+        //        std::cout << "line: " << fix_line << "\n";
         auto pos = fix_line.find("/");
         if (pos == std::string::npos) {
             continue;
@@ -327,8 +329,8 @@ bool CCache::calculate_dep_md5(KeyCalculate &calculate, const std::string &dep_f
 
         fs::path path{fix_line};
         if (fs::exists(path)) {
-
             const std::string filename = path.filename().string();
+            MTR_BEGIN("calculate_key_dep", fix_line.c_str());
             calculate.Update(filename);
 
             if (boost::contains(fix_line, "/DerivedData/")) {
@@ -346,10 +348,10 @@ bool CCache::calculate_dep_md5(KeyCalculate &calculate, const std::string &dep_f
                                          << path.string();
                 calculate.UpdateFormFile(path.string());
             }
+            MTR_END("calculate_key_dep", fix_line.c_str());
         }
     }
     ifs.close();
-
     return true;
 }
 
@@ -419,7 +421,8 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
     keyCalculate->Init();
 
     do {
-        // 将编译器版本加入md5 计算
+        MTR_SCOPE("do_cache", "calculate_key_compiler_version");
+        // 将编译器版本加入key 计算
         const std::string compiler = ctx.orig_args()[0];
         Args args;
         args.push_back(compiler);
@@ -436,9 +439,13 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         }
     } while (0);
 
-    calculate_args_md5(ctx, *keyCalculate);
+    do {
+        MTR_SCOPE("do_cache", "calculate_key_args");
+        calculate_args_key(ctx, *keyCalculate);
+    } while (0);
 
     do {
+        MTR_SCOPE("do_cache", "gen_dep");
         // 执行预处理, 同时生成 .d .dia 文件, 然后基于 .d 文件 以及源码文件 计算缓存的 key
         BOOST_LOG_TRIVIAL(trace) << "pre gen .d";
         auto result = do_execute(ctx, ctx.pre_args());
@@ -451,13 +458,14 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         }
     } while (0);
 
-    if (!calculate_dep_md5(*keyCalculate, ctx.pre_args_info().output_dep)) {
+    if (!calculate_dep_key(*keyCalculate, ctx.pre_args_info().output_dep)) {
         return std::make_pair(false, std::string());
     };
 
     do {
+        MTR_SCOPE("do_cache", "calculate_key_args_input_file");
         const std::string input_file = ctx.pre_args_info().input_file;
-        BOOST_LOG_TRIVIAL(trace) << "md5 input_file " << input_file;
+        BOOST_LOG_TRIVIAL(trace) << "key input_file " << input_file;
         keyCalculate->UpdateFormFile(input_file);
     } while (0);
 
@@ -479,6 +487,7 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
 
     boost::system::error_code code;
     if (fs::exists(cache_file_path, code)) {
+        MTR_SCOPE("do_cache", "copy_cache_file");
         BOOST_LOG_TRIVIAL(trace) << "Hit the cache";
         BOOST_LOG_TRIVIAL(trace) << "cp " << cache_file_path.string() << " " << orig_args_info.output_obj;
         BOOST_LOG_TRIVIAL(trace) << "cp " << pre_args_info.output_dep << " " << orig_args_info.output_dep;
@@ -528,21 +537,35 @@ int CCache::compilation(int argc, const char *const *argv) {
 
     init_log(ctx);
 
+#ifdef MTR_ENABLED
+    if (ctx.log_dir().empty()) {
+        BOOST_LOG_TRIVIAL(error) << "log_dir not configured";
+    } else {
+        ctx.mini_trace = std::make_unique<ccache::MiniTrace>(ctx);
+    }
+#endif
+
     initialize(ctx, argc, argv);
+
+    MTR_BEGIN("main", "find_compiler");
     find_compiler(ctx);
+    MTR_END("main", "find_compiler");
 
     if (boost::ends_with(ctx.orig_args_info().input_file, ".pch") || boost::ends_with(ctx.orig_args_info().output_obj, ".gch")) {
-
+        MTR_BEGIN("compile", "PCH");
         auto compile_result = do_execute(ctx, ctx.orig_args());
         BOOST_LOG_TRIVIAL(trace) << "compile pch status_code "
                                  << compile_result.exit_status;
-
+        MTR_END("compile", "PCH");
         Util::send_to_fd(compile_result.stderr_data, STDERR_FILENO);
         Util::send_to_fd(compile_result.stdout_data, STDOUT_FILENO);
+
         return compile_result.exit_status;
     }
 
+    MTR_BEGIN("do_cache", "start");
     auto result = do_cache_compilation(ctx, argc, argv);
+    MTR_END("do_cache", "start");
     auto hit_cache = result.first;
     auto cache_key = result.second;
     if (hit_cache) {
@@ -554,7 +577,9 @@ int CCache::compilation(int argc, const char *const *argv) {
 
     BOOST_LOG_TRIVIAL(trace) << "Missed cache";
 
+    MTR_BEGIN("compile", "object");
     auto compile_result = do_execute(ctx, ctx.orig_args());
+    MTR_END("compile", "object");
     BOOST_LOG_TRIVIAL(trace) << "compile exit code "
                              << compile_result.exit_status;
 
@@ -586,9 +611,11 @@ int CCache::compilation(int argc, const char *const *argv) {
     }
 
     BOOST_LOG_TRIVIAL(trace) << "Save the cache ...";
+    MTR_BEGIN("save", "copy_object");
     fs::copy_options options = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
     fs::path cache_file_path{FMT("{}/{}", ctx.cache_dir(), cache_key)};
     fs::copy(orig_args_info.output_obj, cache_file_path, options);
+    MTR_END("save", "copy_object");
     BOOST_LOG_TRIVIAL(trace) << "Save the cache "
                              << cache_file_path.string();
     return EXIT_SUCCESS;
