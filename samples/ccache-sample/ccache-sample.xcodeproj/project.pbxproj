@@ -33,6 +33,9 @@
 		3CAE28D32898D1A0003F03E5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3CAE28D52898D1A0003F03E5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CAE28D62898D1A0003F03E5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		3CB9B4B3289D2DB8007EDC91 /* ccache */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccache; sourceTree = "<group>"; };
+		3CB9B4B4289D2DB8007EDC91 /* ccache-clang++ */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "ccache-clang++"; sourceTree = "<group>"; };
+		3CB9B4B5289D2DB8007EDC91 /* ccache-clang */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "ccache-clang"; sourceTree = "<group>"; };
 		D6924FFD53B184A0B8FAC0BF /* libPods-ccache-sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ccache-sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0FFDD2734A4E6340B4C1099 /* Pods-ccache-sample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ccache-sample.debug.xcconfig"; path = "Target Support Files/Pods-ccache-sample/Pods-ccache-sample.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -52,6 +55,7 @@
 		3CAE28B82898D19E003F03E5 = {
 			isa = PBXGroup;
 			children = (
+				3CB9B4B2289D2DB8007EDC91 /* ccache */,
 				3C7A27B52898FC4B0098290F /* Config.xcconfig */,
 				3C7F51B6289CC35600AB3470 /* config.yaml */,
 				3CAE28C32898D19E003F03E5 /* ccache-sample */,
@@ -85,6 +89,16 @@
 				3CAE28D62898D1A0003F03E5 /* main.m */,
 			);
 			path = "ccache-sample";
+			sourceTree = "<group>";
+		};
+		3CB9B4B2289D2DB8007EDC91 /* ccache */ = {
+			isa = PBXGroup;
+			children = (
+				3CB9B4B3289D2DB8007EDC91 /* ccache */,
+				3CB9B4B4289D2DB8007EDC91 /* ccache-clang++ */,
+				3CB9B4B5289D2DB8007EDC91 /* ccache-clang */,
+			);
+			path = ccache;
 			sourceTree = "<group>";
 		};
 		4DDF2A0FAF78C990372C501B /* Frameworks */ = {
@@ -376,6 +390,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -406,6 +421,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

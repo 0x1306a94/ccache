@@ -34,7 +34,7 @@ CCACHE_EXEC_DIR=$CUR_DIR/../../../build
 # 指定配置文件
 export CCACHE_CONFIG=$CUR_DIR/../../config.yaml
 # 启用trace记录,需要在编译时指定 -DMTR_ENABLED=ON
-export CCACHE_INTERNAL_TRACE_ENV_KEY=1
+export CCACHE_INTERNAL_TRACE=1
 export PATH=$CCACHE_EXEC_DIR:$PATH
 # env
 
@@ -52,7 +52,7 @@ CCACHE_EXEC_DIR=$CUR_DIR/../../../build
 # 指定配置文件
 export CCACHE_CONFIG=$CUR_DIR/../../config.yaml
 # 启用trace记录,需要在编译时指定 -DMTR_ENABLED=ON
-export CCACHE_INTERNAL_TRACE_ENV_KEY=1
+export CCACHE_INTERNAL_TRACE=1
 export PATH=$CCACHE_EXEC_DIR:$PATH
 # env
 
@@ -127,4 +127,4 @@ sudo mount -t nfs 172.30.101.2:/Users/xxx/Work/NFSD_WORK ~/Work/NFSD_WORK/
 sudo umount ~/Work/NFSD_WORK/ 
 ```
 ## Thanks
-* [ccache/ccache](https://github.com/ccache/ccache)
+* 部分代码借鉴于[ccache/ccache](https://github.com/ccache/ccache)
