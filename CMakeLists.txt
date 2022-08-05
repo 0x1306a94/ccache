@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(TARGAT_NAME "ccache")
 
-option(USE_CACAHE_KEY_OPENSSL_MD5 "Use OpenSSL MD5 for ccache key" OFF)
-option(USE_CACAHE_KEY_XXHASH "Use xxHash for ccache key" ON)
+option(USE_CACAHE_KEY_OPENSSL_MD5 "Use OpenSSL MD5 for ccache key" ON)
+option(USE_CACAHE_KEY_XXHASH "Use xxHash for ccache key" OFF)
 option(MTR_ENABLED "Enable mtr" OFF)
 
 find_package(Git QUIET)
