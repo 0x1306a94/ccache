@@ -24,6 +24,7 @@ class MiniTrace {
   private:
     const void *const m_trace_id;
     std::string m_trace_file;
+    std::string m_start_time;
 };
 };  // namespace ccache
 #endif

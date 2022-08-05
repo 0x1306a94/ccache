@@ -22,8 +22,9 @@ MiniTrace::MiniTrace(Context &ctx)
     mtr_init(m_trace_file.c_str());
     auto cur_duration = std::chrono::system_clock::now().time_since_epoch();
     auto mil = std::chrono::duration_cast<std::chrono::milliseconds>(cur_duration);
-    MTR_INSTANT_C("", "", "time", FMT("{}", mil.count()).c_str());
-    MTR_META_PROCESS_NAME("ccache");
+	m_start_time = FMT("{}", mil.count());
+	MTR_INSTANT_C("", "", "time", m_start_time.c_str());
+	MTR_META_PROCESS_NAME("ccache");
     MTR_START("program", "ccache", m_trace_id);
 }
 
