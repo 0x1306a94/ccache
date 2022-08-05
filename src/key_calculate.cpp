@@ -87,7 +87,7 @@ void KeyCalculate::UpdateFormFile(const std::string &path) {
     if (fp == NULL) {
         return;
     }
-#define BUFFER_SIZE 65536
+#define BUFFER_SIZE 4096
     unsigned char data[BUFFER_SIZE];
     size_t ret = 0;
     while (true) {
