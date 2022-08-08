@@ -5,7 +5,7 @@
 ## build
 
 ```shell
-brew install opensll boost
+brew install openssl boost xxhash
 
 git clone https://github.com/0x1306a94/ccache
 cd ccache
