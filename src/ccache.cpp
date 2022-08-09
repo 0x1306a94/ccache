@@ -253,6 +253,14 @@ void CCache::calculate_args_key(Context &ctx, KeyCalculate &calculate) {
 
     std::set<const char *, strless> args_set;
     std::vector<const char *> argv = ctx.orig_args().to_argv();
+    // 对参数进行排序,避免参数顺序变化导致缓存无法命中
+    std::sort(argv.begin(), argv.end(), [](const char *lhs, const char *rhs) {
+        if (lhs == NULL || rhs == NULL) {
+            return false;
+        }
+        return strcmp(lhs, rhs) < 0;
+    });
+
     size_t argc = argv.size();
     std::stringstream full_argv_stream;
     std::stringstream key_argv_stream;
@@ -263,7 +271,7 @@ void CCache::calculate_args_key(Context &ctx, KeyCalculate &calculate) {
         if (item == nullptr) {
             continue;
         }
-
+        // 过滤重复参数
         if (args_set.find(item) != args_set.end()) {
             BOOST_LOG_TRIVIAL(info) << "exists arg: " << item;
             continue;
