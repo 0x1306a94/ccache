@@ -7,3 +7,6 @@
 [submodule "third_party/minitrace"]
 	path = third_party/minitrace
 	url = https://github.com/hrydgard/minitrace.git
+[submodule "third_party/argparse"]
+	path = third_party/argparse
+	url = https://github.com/p-ranav/argparse.git

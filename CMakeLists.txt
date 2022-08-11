@@ -34,15 +34,6 @@ option(MTR_ENABLED "Enable mtr" OFF)
 
 git_submodule_check("${PROJECT_SOURCE_DIR}/third_party/yaml-cpp/CMakeLists.txt")
 
-set(YAML_CPP_BUILD_TOOLS
-    OFF
-    CACHE BOOL "Build tools for yaml-cpp" FORCE)
-set(YAML_BUILD_SHARED_LIBS
-    OFF
-    CACHE BOOL "Build shared libraries for yaml-cpp" FORCE)
-add_subdirectory(third_party/yaml-cpp)
-add_subdirectory(third_party/fmt)
-
 # message("lib prefix: ${CMAKE_FIND_LIBRARY_PREFIXES}")
 
 # message("lib suffix: ${CMAKE_FIND_LIBRARY_SUFFIXES}")
@@ -58,8 +49,19 @@ source_group("Source Files" ${SOURCE_FILES})
 
 add_executable(${CCACHE_TARGET_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
-target_link_libraries(${CCACHE_TARGET_NAME} yaml-cpp)
-target_link_libraries(${CCACHE_TARGET_NAME} fmt)
+set(YAML_CPP_BUILD_TOOLS
+    OFF
+    CACHE BOOL "Build tools for yaml-cpp" FORCE)
+set(YAML_BUILD_SHARED_LIBS
+    OFF
+    CACHE BOOL "Build shared libraries for yaml-cpp" FORCE)
+
+add_third_party(${CCACHE_TARGET_NAME} yaml-cpp
+                ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
+add_third_party(${CCACHE_TARGET_NAME} fmt
+                ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
+add_third_party(${CCACHE_TARGET_NAME} argparse
+                ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 
 # set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 
@@ -67,12 +69,6 @@ target_link_libraries(${CCACHE_TARGET_NAME} fmt)
 
 target_include_directories(${CCACHE_TARGET_NAME}
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
-target_include_directories(
-  ${CCACHE_TARGET_NAME}
-  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/yaml-cpp/include")
-target_include_directories(
-  ${CCACHE_TARGET_NAME}
-  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt/include")
 target_include_directories(${CCACHE_TARGET_NAME}
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 

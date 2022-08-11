@@ -107,3 +107,15 @@ macro(find_homebrew_xxhash)
     endif()
   endif()
 endmacro()
+
+macro(add_third_party TARGET_NAME THIRD_PARTY_NAME THIRD_PARTY_DIR)
+  if(NOT EXISTS ${THIRD_PARTY_DIR})
+    message(
+      FATAL_ERROR
+        "The third party directory ${THIRD_PARTY_DIR} does not exist. Please create it and try again."
+    )
+  endif()
+  add_subdirectory(${THIRD_PARTY_DIR}/${THIRD_PARTY_NAME})
+  target_link_libraries(${TARGET_NAME} ${THIRD_PARTY_NAME})
+  target_include_directories(${TARGET_NAME} PUBLIC ${THIRD_PARTY_DIR}/${THIRD_PARTY_NAME}/include)
+endmacro()
