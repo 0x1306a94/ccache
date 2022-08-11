@@ -17,7 +17,8 @@
                 "-I/usr/local/openssl/include",
                 "-I/usr/local/boost/include",
                 "-I${workspaceFolder}/src"
-            ]
+            ],
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4
