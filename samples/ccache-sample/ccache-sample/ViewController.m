@@ -56,18 +56,14 @@
         maker.size.mas_equalTo(CGSizeMake(100, 100));
     });
 
-//    MAS_UPDATE(view, {
-//        maker.size.mas_equalTo(CGSizeMake(20, 60));
-//    });
-//
-//
-    MAS_REMAKE(view, {
+    MAS_UPDATE(view, {
         maker.size.mas_equalTo(CGSizeMake(20, 60));
     });
+
+    //    MAS_REMAKE(view, {
+    //        maker.size.mas_equalTo(CGSizeMake(20, 60));
+    //    });
 }
 
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    
-}
 @end
 

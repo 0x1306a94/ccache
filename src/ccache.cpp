@@ -470,7 +470,8 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
     BOOST_LOG_TRIVIAL(trace) << "cache file "
                              << cache_file_path;
 
-    if (Util::file_exists(cache_file_path.c_str())) {
+    boost::system::error_code ec;
+    if (fs::exists(cache_file_path, ec)) {
         MTR_SCOPE("do_cache", "copy_cache_file");
         BOOST_LOG_TRIVIAL(trace) << "Hit the cache";
         BOOST_LOG_TRIVIAL(trace) << "cp " << cache_file_path << " " << orig_args_info.output_obj;
@@ -481,7 +482,7 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         fs::copy(pre_args_info.output_dia, orig_args_info.output_dia, options);
         return std::make_pair(true, digest);
     } else {
-        BOOST_LOG_TRIVIAL(trace) << "cache file exists code";
+        BOOST_LOG_TRIVIAL(trace) << "cache file exists code " << ec.message();
     }
     return std::make_pair(false, digest);
 }
