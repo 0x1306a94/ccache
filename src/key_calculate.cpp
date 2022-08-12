@@ -14,6 +14,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/log/trivial.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
@@ -43,11 +44,11 @@ KeyCalculate::KeyCalculate(Config &config)
     : m_config(config)
     , PImpl(Impl::CreateImpl()) {
 
-    std::cout << __FUNCTION__ << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
 }
 
 KeyCalculate::~KeyCalculate() {
-    std::cout << __FUNCTION__ << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
 }
 
 void KeyCalculate::Init() {
@@ -78,9 +79,7 @@ void KeyCalculate::Update(const std::string &content) {
 void KeyCalculate::UpdateFormFile(const std::string &path) {
 
     if (!fs::exists(path)) {
-        std::cout << "ccache: KeyCalculate file not exists \n"
-                  << path
-                  << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "KeyCalculate file not exists";
         return;
     }
 
@@ -113,9 +112,12 @@ void KeyCalculate::Final() {
 #if defined(USE_CACAHE_KEY_OPENSSL_MD5)
 struct OPENSSL_MD5_IMP : Impl {
     EVP_MD_CTX *m_ctx{nullptr};
+    OPENSSL_MD5_IMP() {
+        BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
+    }
 
     ~OPENSSL_MD5_IMP() {
-        std::cout << __FUNCTION__ << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
         if (m_ctx != nullptr) {
             EVP_MD_CTX_free(m_ctx);
             m_ctx = nullptr;
@@ -167,12 +169,16 @@ struct OPENSSL_MD5_IMP : Impl {
 #elif defined(USE_CACAHE_KEY_XXHASH)
 struct XXHASH_IMP : Impl {
     XXH64_state_t *m_state{NULL};
+    XXHASH_IMP() {
+        BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
+    }
+
     ~XXHASH_IMP() {
         if (m_state != NULL) {
             XXH64_freeState(m_state);
             m_state = NULL;
         }
-        std::cout << __FUNCTION__ << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
     };
 
     void Init() override {

@@ -33,7 +33,6 @@
 		3CAE28D32898D1A0003F03E5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3CAE28D52898D1A0003F03E5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CAE28D62898D1A0003F03E5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		3CB9B4B3289D2DB8007EDC91 /* ccache */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = ccache; sourceTree = "<group>"; };
 		3CB9B4B4289D2DB8007EDC91 /* ccache-clang++ */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "ccache-clang++"; sourceTree = "<group>"; };
 		3CB9B4B5289D2DB8007EDC91 /* ccache-clang */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "ccache-clang"; sourceTree = "<group>"; };
 		D6924FFD53B184A0B8FAC0BF /* libPods-ccache-sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ccache-sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,7 +93,6 @@
 		3CB9B4B2289D2DB8007EDC91 /* ccache */ = {
 			isa = PBXGroup;
 			children = (
-				3CB9B4B3289D2DB8007EDC91 /* ccache */,
 				3CB9B4B4289D2DB8007EDC91 /* ccache-clang++ */,
 				3CB9B4B5289D2DB8007EDC91 /* ccache-clang */,
 			);

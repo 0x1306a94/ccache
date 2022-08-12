@@ -20,21 +20,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/format.hpp>
-#include <boost/log/attributes/named_scope.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/detail/format.hpp>
-#include <boost/log/detail/thread_id.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/sinks/text_ostream_backend.hpp>
-#include <boost/log/sources/global_logger_storage.hpp>
-#include <boost/log/sources/logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/support/date_time.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
-#include <boost/log/utility/setup/console.hpp>
-#include <boost/log/utility/setup/file.hpp>
 #include <boost/regex.hpp>
 
 #include <chrono>
@@ -60,44 +46,12 @@ namespace ccache {
 CCache::CCache(Config &config)
     : m_config(config) {
 
-    std::cout << __FUNCTION__ << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
 }
 
 CCache::~CCache() {
 
-    std::cout << __FUNCTION__ << std::endl;
-}
-
-void CCache::init_log(Context &ctx) {
-    namespace logging = boost::log;
-    namespace src = boost::log::sources;
-    namespace keywords = boost::log::keywords;
-    namespace sinks = boost::log::sinks;
-    namespace expr = boost::log::expressions;
-
-    auto log_file = FMT("{}/{}.log", ctx.log_dir(), ctx.build_task_id());
-
-    auto foramt = (expr::stream
-                   << "ccache: "
-                   << "[" << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
-                   //                            << " " << expr::attr<boost::log::aux::thread::id>("ThreadID")
-                   << " " << logging::trivial::severity
-                   << "] "
-                   << "" << expr::smessage);
-
-    auto sink = logging::add_file_log(
-        keywords::open_mode = std::ios::trunc,
-        keywords::file_name = log_file,
-        keywords::rotation_size = 10 * 1024 * 1024,
-        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
-        keywords::format = foramt);
-
-    sink->locked_backend()->auto_flush(true);
-    sink->imbue(std::locale("zh_CN.UTF-8"));
-    if (m_config.console_log) {
-        logging::add_console_log(std::cout, keywords::format = foramt);
-    }
-    logging::add_common_attributes();
+    BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
 }
 
 void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
@@ -115,7 +69,8 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
         if (boost::starts_with(arg_item, "-o")) {
             auto output_obj = argv[++i];
             orig_args_info.output_obj = output_obj;
-
+            BOOST_LOG_TRIVIAL(trace) << "output_obj "
+                                     << output_obj;
             continue;
         }
 
@@ -321,10 +276,11 @@ void CCache::calculate_args_key(Context &ctx, KeyCalculate &calculate) {
     BOOST_LOG_TRIVIAL(trace) << key_argv_stream.str();
 }
 
-bool CCache::calculate_dep_key(KeyCalculate &calculate, const std::string &dep_file) {
+bool CCache::calculate_dep_key(KeyCalculate &calculate, const std::string &input_file, const std::string &dep_file) {
 
-    BOOST_LOG_TRIVIAL(trace) << "read .d "
-                             << dep_file;
+    BOOST_LOG_TRIVIAL(trace) << "read .d ";
+    BOOST_LOG_TRIVIAL(trace) << input_file;
+    BOOST_LOG_TRIVIAL(trace) << dep_file;
 
     std::ifstream ifs(dep_file, std::ios::in);
     if (!ifs.is_open()) {
@@ -364,9 +320,11 @@ bool CCache::calculate_dep_key(KeyCalculate &calculate, const std::string &dep_f
                 calculate.UpdateFormFile(fix_line);
             } else {
                 if (m_config.key_by_content) {
-                    BOOST_LOG_TRIVIAL(trace) << ".d content "
-                                             << path.string();
-                    calculate.UpdateFormFile(path.string());
+                    if (!boost::equals(path.string(), input_file)) {
+                        BOOST_LOG_TRIVIAL(trace) << ".d content "
+                                                 << path.string();
+                        calculate.UpdateFormFile(path.string());
+                    }
                 } else if (m_config.key_by_time) {
                     auto time = fs::last_write_time(path);
                     const std::string milliseconds_str = FMT("{}", time);
@@ -486,7 +444,7 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         }
     } while (0);
 
-    if (!calculate_dep_key(*keyCalculate, ctx.pre_args_info().output_dep)) {
+    if (!calculate_dep_key(*keyCalculate, ctx.orig_args_info().input_file, ctx.pre_args_info().output_dep)) {
         return std::make_pair(false, std::string());
     };
 
@@ -531,24 +489,7 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
     return std::make_pair(false, digest);
 }
 
-int CCache::compilation(int argc, const char *const *argv) {
-    if (argc <= 1) {
-        return EXIT_SUCCESS;
-    }
-
-    const char *build_id = getenv(LLBUILD_BUILD_ID_ENV_KEY);
-    const char *build_task_id = getenv(LLBUILD_TASK_ID_ENV_KEY);
-    Context ctx{
-        m_config.file_storage.path,
-        m_config.log_dir,
-        build_id == NULL ? std::string() : std::string(build_id),
-        build_task_id == NULL ? std::string() : std::string(build_task_id),
-    };
-
-    auto cur_duration = std::chrono::system_clock::now().time_since_epoch();
-    auto mil = std::chrono::duration_cast<std::chrono::milliseconds>(cur_duration);
-    std::string cur_work_dir_name = FMT("{}-{}", Util::str_rand(6), mil.count());
-    ctx.append_temporary_dir(cur_work_dir_name);
+int CCache::compilation(Context &ctx, int argc, const char *const *argv) {
 
     ccache::Finalizer clenup_finalizer([&ctx] {
         fs::path temporary_dir_path(ctx.temporary_dir());
@@ -562,8 +503,6 @@ int CCache::compilation(int argc, const char *const *argv) {
                                      << code;
         }
     });
-
-    init_log(ctx);
 
     BOOST_LOG_TRIVIAL(info) << "Version "
                             << CCACHE_VERSION_FULL;
@@ -607,6 +546,21 @@ int CCache::compilation(int argc, const char *const *argv) {
         return compile_result.exit_status;
     }
 
+    ArgsInfo &orig_args_info = ctx.orig_args_info();
+    ArgsInfo &pre_args_info = ctx.pre_args_info();
+
+    if (orig_args_info.output_obj.empty() || orig_args_info.input_file.empty()) {
+        MTR_BEGIN("compile", "no_compile_object");
+        auto compile_result = do_execute(ctx, ctx.orig_args());
+        BOOST_LOG_TRIVIAL(trace) << "no_compile_object status_code "
+                                 << compile_result.exit_status;
+        MTR_END("compile", "no_compile_object");
+        Util::send_to_fd(compile_result.stderr_data, STDERR_FILENO);
+        Util::send_to_fd(compile_result.stdout_data, STDOUT_FILENO);
+
+        return compile_result.exit_status;
+    }
+
     MTR_BEGIN("do_cache", "do_cache");
     auto result = do_cache_compilation(ctx, argc, argv);
     MTR_END("do_cache", "do_cache");
@@ -615,9 +569,6 @@ int CCache::compilation(int argc, const char *const *argv) {
     if (hit_cache) {
         return EXIT_SUCCESS;
     }
-
-    ArgsInfo &orig_args_info = ctx.orig_args_info();
-    ArgsInfo &pre_args_info = ctx.pre_args_info();
 
     BOOST_LOG_TRIVIAL(trace) << "Missed cache";
 

@@ -1,4 +1,5 @@
 
+#include <chrono>
 #include <execinfo.h>
 #include <iostream>
 #include <mach-o/dyld.h>
@@ -9,12 +10,29 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <boost/log/attributes/named_scope.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/detail/format.hpp>
+#include <boost/log/detail/thread_id.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/sinks/text_ostream_backend.hpp>
+#include <boost/log/sources/global_logger_storage.hpp>
+#include <boost/log/sources/logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/file.hpp>
 #include <yaml-cpp/yaml.h>
 
+#include "Util.hpp"
 #include "ccache.hpp"
 #include "cli.hpp"
 #include "config.hpp"
+#include "context.hpp"
 #include "env_key.h"
+#include "fmtmacros.hpp"
 #include "key_calculate.hpp"
 
 void handler(int sig) {
@@ -41,6 +59,38 @@ void handler(int sig) {
     }
 
     exit(sig);
+}
+
+void init_log(ccache::Context &ctx, bool console_log) {
+    namespace logging = boost::log;
+    namespace src = boost::log::sources;
+    namespace keywords = boost::log::keywords;
+    namespace sinks = boost::log::sinks;
+    namespace expr = boost::log::expressions;
+
+    auto log_file = FMT("{}/{}.log", ctx.log_dir(), ctx.build_task_id());
+
+    auto foramt = (expr::stream
+                   << "ccache: "
+                   << "[" << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
+                   //                            << " " << expr::attr<boost::log::aux::thread::id>("ThreadID")
+                   << " " << logging::trivial::severity
+                   << "] "
+                   << "" << expr::smessage);
+
+    auto sink = logging::add_file_log(
+        keywords::open_mode = std::ios::trunc,
+        keywords::file_name = log_file,
+        keywords::rotation_size = 10 * 1024 * 1024,
+        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+        keywords::format = foramt);
+
+    sink->locked_backend()->auto_flush(true);
+    sink->imbue(std::locale("zh_CN.UTF-8"));
+    if (console_log) {
+        logging::add_console_log(std::cout, keywords::format = foramt);
+    }
+    logging::add_common_attributes();
 }
 
 int main(int argc, char *const *argv) {
@@ -77,8 +127,24 @@ int main(int argc, char *const *argv) {
     //
     //    std::cout << ss.str() << std::endl;
 
+    const char *build_id = getenv(LLBUILD_BUILD_ID_ENV_KEY);
+    const char *build_task_id = getenv(LLBUILD_TASK_ID_ENV_KEY);
+    ccache::Context ctx{
+        config.file_storage.path,
+        config.log_dir,
+        build_id == NULL ? std::string() : std::string(build_id),
+        build_task_id == NULL ? std::string() : std::string(build_task_id),
+    };
+
+    auto cur_duration = std::chrono::system_clock::now().time_since_epoch();
+    auto mil = std::chrono::duration_cast<std::chrono::milliseconds>(cur_duration);
+    std::string cur_work_dir_name = FMT("{}-{}", ccache::Util::str_rand(6), mil.count());
+    ctx.append_temporary_dir(cur_work_dir_name);
+
+    init_log(ctx, config.console_log);
+
     std::unique_ptr<ccache::CCache> cache = std::make_unique<ccache::CCache>(config);
-    int result = cache->compilation(argc, argv);
+    int result = cache->compilation(ctx, argc, argv);
     return result;
 }
 

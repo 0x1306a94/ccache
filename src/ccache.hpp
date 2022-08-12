@@ -23,19 +23,15 @@ class CCache {
 
     ~CCache();
 
-    int compilation(int argc, const char *const *argv);
+    int compilation(Context &ctx, int argc, const char *const *argv);
 
   private:
     Config &m_config;
-    int m_argc;
-    char **m_argv{nullptr};
-
-    void init_log(Context &ctx);
 
     void initialize(Context &ctx, int argc, const char *const *argv);
 
     void calculate_args_key(Context &ctx, KeyCalculate &calculate);
-    bool calculate_dep_key(KeyCalculate &calculate, const std::string &dep_file);
+    bool calculate_dep_key(KeyCalculate &calculate, const std::string &input_file, const std::string &dep_file);
 
     std::pair<bool, std::string> do_cache_compilation(Context &ctx, int argc, const char *const *argv);
 
