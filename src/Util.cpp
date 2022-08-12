@@ -165,5 +165,8 @@ std::string Util::read_file(const std::string &path) {
     return result;
 }
 
+bool Util::file_exists(const char *file_path) {
+    return access(file_path, F_OK) == 0;
+}
 };  // namespace ccache
 

@@ -465,17 +465,15 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
     ArgsInfo &pre_args_info = ctx.pre_args_info();
 
     fs::copy_options options = fs::copy_options::overwrite_existing | fs::copy_options::recursive;
-    const std::string path = FMT("{}/{}", ctx.cache_dir(), digest);
-    fs::path cache_file_path{path};
+    const std::string cache_file_path = FMT("{}/{}", ctx.cache_dir(), digest);
 
     BOOST_LOG_TRIVIAL(trace) << "cache file "
-                             << path;
+                             << cache_file_path;
 
-    boost::system::error_code code;
-    if (fs::exists(cache_file_path, code)) {
+    if (Util::file_exists(cache_file_path.c_str())) {
         MTR_SCOPE("do_cache", "copy_cache_file");
         BOOST_LOG_TRIVIAL(trace) << "Hit the cache";
-        BOOST_LOG_TRIVIAL(trace) << "cp " << cache_file_path.string() << " " << orig_args_info.output_obj;
+        BOOST_LOG_TRIVIAL(trace) << "cp " << cache_file_path << " " << orig_args_info.output_obj;
         BOOST_LOG_TRIVIAL(trace) << "cp " << pre_args_info.output_dep << " " << orig_args_info.output_dep;
         BOOST_LOG_TRIVIAL(trace) << "cp " << pre_args_info.output_dia << " " << orig_args_info.output_dia;
         fs::copy(cache_file_path, orig_args_info.output_obj, options);
@@ -483,8 +481,7 @@ std::pair<bool, std::string> CCache::do_cache_compilation(Context &ctx, int argc
         fs::copy(pre_args_info.output_dia, orig_args_info.output_dia, options);
         return std::make_pair(true, digest);
     } else {
-        BOOST_LOG_TRIVIAL(trace) << "cache file exists code "
-                                 << code;
+        BOOST_LOG_TRIVIAL(trace) << "cache file exists code";
     }
     return std::make_pair(false, digest);
 }

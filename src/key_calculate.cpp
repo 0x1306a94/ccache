@@ -7,6 +7,8 @@
 
 #include "key_calculate.hpp"
 
+#include "Fd.hpp"
+#include "Util.hpp"
 #include "config.hpp"
 #include "configure.h"
 #include "fmtmacros.hpp"
@@ -78,30 +80,35 @@ void KeyCalculate::Update(const std::string &content) {
 
 void KeyCalculate::UpdateFormFile(const std::string &path) {
 
-    if (!fs::exists(path)) {
+    if (!Util::file_exists(path.c_str())) {
         BOOST_LOG_TRIVIAL(error) << "KeyCalculate file not exists";
         return;
     }
 
-    FILE *fp = fopen(path.c_str(), "rb");
+    FILE *fp = fopen(path.c_str(), "rt");
     if (fp == NULL) {
+        BOOST_LOG_TRIVIAL(error) << "KeyCalculate file not open "
+                                 << path;
         return;
     }
+
+    BOOST_LOG_TRIVIAL(trace) << "KeyCalculate UpdateFormFile "
+                             << path;
+
+    Fd fd(fileno(fp));
+
 #define BUFFER_SIZE 4096
-    unsigned char data[BUFFER_SIZE];
-    size_t ret = 0;
+    char temp_buffer[BUFFER_SIZE];
     while (true) {
-        ret = fread(data, BUFFER_SIZE, 1, fp);
-        if (ret == EOF) {
+        ssize_t ret = read(*fd, temp_buffer, BUFFER_SIZE);
+        if (ret == EOF || ret == 0) {
             break;
         }
-        if (ret == 0) {
-            break;
-        }
-        PImpl->Update(data, ret);
+
+        BOOST_LOG_TRIVIAL(trace) << "KeyCalculate UpdateFormFile read size "
+                                 << ret;
+        PImpl->Update(temp_buffer, ret);
     }
-    fclose(fp);
-    fp = NULL;
 #undef BUFFER_SIZE
 }
 

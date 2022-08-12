@@ -23,6 +23,8 @@ struct Util {
     static void set_cloexec_flag(int fd);
 
     static std::string read_file(const std::string &path);
+    
+    static bool file_exists(const char *file_path);
 };
 };  // namespace ccache
 
