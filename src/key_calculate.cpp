@@ -163,26 +163,26 @@ struct OPENSSL_MD5_IMP : Impl {
         EVP_MD_CTX_free(m_ctx);
         m_ctx = nullptr;
 
-        char out[EVP_MAX_MD_SIZE * 2 + 1] = {'\0'};
-        for (int i = 0; i < md5_digest_len; i++) {
-            sprintf(out + i * 2, "%02x", md5_digest[i]);
+        std::stringstream ss;
+        for (int idx = 0; idx < md5_digest_len; idx++) {
+            ss << FMT("{:02x}", md5_digest[idx]);
         }
 
         OPENSSL_free(md5_digest);
-
-        return std::string{out};
+        std::string md5_str = ss.str();
+        return md5_str;
     }
 };
 #elif defined(USE_CACAHE_KEY_XXHASH)
 struct XXHASH_IMP : Impl {
-    XXH64_state_t *m_state{NULL};
+    XXH3_state_t *m_state{NULL};
     XXHASH_IMP() {
         BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
     }
 
     ~XXHASH_IMP() {
         if (m_state != NULL) {
-            XXH64_freeState(m_state);
+            XXH3_freeState(m_state);
             m_state = NULL;
         }
         BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;
@@ -190,18 +190,18 @@ struct XXHASH_IMP : Impl {
 
     void Init() override {
         if (m_state != NULL) {
-            XXH64_freeState(m_state);
+            XXH3_freeState(m_state);
             m_state = NULL;
         }
 
-        m_state = XXH64_createState();
+        m_state = XXH3_createState();
         if (m_state == NULL) {
             abort();
         }
 
         /* Initialize state with selected seed */
         XXH64_hash_t const seed = 0; /* or any other value */
-        if (XXH64_reset(m_state, seed) == XXH_ERROR) {
+        if (XXH3_128bits_reset_withSeed(m_state, seed) == XXH_ERROR) {
             abort();
         }
     }
@@ -210,7 +210,7 @@ struct XXHASH_IMP : Impl {
         if (m_state == NULL) {
             return;
         }
-        if (XXH64_update(m_state, data, len) == XXH_ERROR) {
+        if (XXH3_128bits_update(m_state, data, len) == XXH_ERROR) {
             abort();
         }
     }
@@ -220,7 +220,7 @@ struct XXHASH_IMP : Impl {
             return;
         }
         const char *str = content.c_str();
-        if (XXH64_update(m_state, str, strlen(str)) == XXH_ERROR) {
+        if (XXH3_128bits_update(m_state, str, strlen(str)) == XXH_ERROR) {
             abort();
         }
     }
@@ -229,13 +229,25 @@ struct XXHASH_IMP : Impl {
         if (m_state == NULL) {
             return std::string();
         }
-        XXH64_hash_t const hash = XXH64_digest(m_state);
-        //        XXH64_canonical_t dst;
-        //        XXH64_canonicalFromHash(&dst, hash);
-        XXH64_freeState(m_state);
+        XXH128_hash_t const hash = XXH3_128bits_digest(m_state);
+        XXH128_canonical_t dst;
+        XXH128_canonicalFromHash(&dst, hash);
+        XXH3_freeState(m_state);
         m_state = NULL;
 
-        std::string hex = FMT("{:x}", hash);
+        size_t len = sizeof(XXH128_hash_t);
+        std::stringstream ss;
+#if XXH_CPU_LITTLE_ENDIAN
+        for (size_t idx = len - 1; idx < len; idx--) {
+            ss << FMT("{:02x}", dst.digest[idx]);
+        }
+#else
+        for (size_t idx = 0; idx < len; idx++) {
+            ss << FMT("{:02x}", dst.digest[idx]);
+        }
+#endif
+
+        std::string hex = ss.str();
         return hex;
     }
 };
