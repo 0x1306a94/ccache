@@ -103,6 +103,7 @@ void CCache::initialize(Context &ctx, int argc, const char *const *argv) {
         if (boost::starts_with(arg_item, "-c")) {
             auto input_file = argv[++i];
             orig_args_info.input_file = input_file;
+            orig_args_info.compile_object = true;
 
             BOOST_LOG_TRIVIAL(trace) << "input_file "
                                      << input_file;
@@ -547,7 +548,7 @@ int CCache::compilation(Context &ctx, int argc, const char *const *argv) {
     ArgsInfo &orig_args_info = ctx.orig_args_info();
     ArgsInfo &pre_args_info = ctx.pre_args_info();
 
-    if (orig_args_info.output_obj.empty() || orig_args_info.input_file.empty()) {
+    if (!orig_args_info.compile_object) {
         MTR_BEGIN("compile", "no_compile_object");
         auto compile_result = do_execute(ctx, ctx.orig_args());
         BOOST_LOG_TRIVIAL(trace) << "no_compile_object status_code "

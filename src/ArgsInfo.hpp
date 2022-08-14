@@ -29,6 +29,7 @@ struct ArgsInfo {
     std::string os;
     std::string device;
     std::string isysroot;
+    bool compile_object{false};
 };
 };  // namespace ccache
 
