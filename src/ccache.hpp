@@ -12,21 +12,21 @@
 
 namespace ccache {
 
-class Config;
+class ProjectConfig;
 class KeyCalculate;
 class Context;
 
 class CCache {
 
   public:
-    CCache(Config &config);
+    CCache(ProjectConfig &config);
 
     ~CCache();
 
     int compilation(Context &ctx, int argc, const char *const *argv);
 
   private:
-    Config &m_config;
+    ProjectConfig &m_config;
 
     void initialize(Context &ctx, int argc, const char *const *argv);
 

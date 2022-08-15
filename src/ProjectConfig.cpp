@@ -1,11 +1,11 @@
 //
-//  config.cpp
+//  ProjectConfig.cpp
 //  ccache
 //
 //  Created by king on 2022/8/3.
 //
 
-#include "config.hpp"
+#include "ProjectConfig.hpp"
 
 #include "fmtmacros.hpp"
 
@@ -14,7 +14,7 @@
 #include <iostream>
 #include <stdlib.h>
 namespace ccache {
-void Config::replace_environment_variables() {
+void ProjectConfig::replace_environment_variables() {
 
     boost::regex reg("(\\${.*?})");
     auto replace_ifneeded = [&](const std::string &item) -> std::string {
@@ -56,9 +56,9 @@ void Config::replace_environment_variables() {
         _remove_path_prefix.push_back(replaced);
     }
 
-    std::string file_storage_path = replace_ifneeded(file_storage.path);
+    std::string file_storage_path = replace_ifneeded(file_storage.host);
     std::string log_dir_path = replace_ifneeded(log_dir);
-    this->file_storage.path = file_storage_path;
+    this->file_storage.host = file_storage_path;
     this->log_dir = log_dir_path;
     this->ignore_path_prefix = _ignore_path_prefix;
     this->remove_path_prefix = _remove_path_prefix;

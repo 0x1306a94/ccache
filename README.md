@@ -30,11 +30,12 @@ xed .
 
 # ccache-clang
 CUR_DIR=$(dirname $0)
-CCACHE_EXEC_DIR=$CUR_DIR/../../../build
-# 指定配置文件
-export CCACHE_CONFIG=$CUR_DIR/../../config.yaml
+# 指定项目配置文件
+export CCACHE_PROJECT_CONFIG=$CUR_DIR/../../config.yaml
 # 启用trace记录,需要在编译时指定 -DMTR_ENABLED=ON
 export CCACHE_INTERNAL_TRACE=1
+# 本机测试
+CCACHE_EXEC_DIR=$CUR_DIR/../../../build
 export PATH=$CCACHE_EXEC_DIR:$PATH
 # env
 
@@ -48,11 +49,12 @@ ccache /usr/bin/clang "$@"
 
 # ccache-clang++
 CUR_DIR=$(dirname $0)
-CCACHE_EXEC_DIR=$CUR_DIR/../../../build
-# 指定配置文件
-export CCACHE_CONFIG=$CUR_DIR/../../config.yaml
+# 指定项目配置文件
+export CCACHE_PROJECT_CONFIG=$CUR_DIR/../../config.yaml
 # 启用trace记录,需要在编译时指定 -DMTR_ENABLED=ON
 export CCACHE_INTERNAL_TRACE=1
+# 本机测试
+CCACHE_EXEC_DIR=$CUR_DIR/../../../build
 export PATH=$CCACHE_EXEC_DIR:$PATH
 # env
 
@@ -78,7 +80,7 @@ chmod +x ccache-clang ccache-clang++
 # 缓存位置配置
 file_storage:
   scheme: "file" # 使用文件缓存
-  path: "/Users/${USER}/Work/NFSD_WORK/ccache_samples"
+  host: "/Users/${USER}/Work/NFSD_WORK/ccache_samples"
 # 日志存放目录
 log_dir: "/Users/${USER}/Work/NFSD_WORK/ccache_sample_log"
 # 是否将日志输出到控制台,开启后可以在Xcode 编译日志中查看

@@ -11,11 +11,11 @@
 #include <string>
 
 namespace ccache {
-class Config;
+class ProjectConfig;
 class Impl;
 class KeyCalculate {
   public:
-    KeyCalculate(Config &config);
+    KeyCalculate(ProjectConfig &config);
     ~KeyCalculate();
 
     void Init();
@@ -30,7 +30,7 @@ class KeyCalculate {
 
   private:
     std::unique_ptr<Impl> PImpl;
-    Config &m_config;
+    ProjectConfig &m_config;
     std::string m_digest;
 };
 };     // namespace ccache

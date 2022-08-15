@@ -1,6 +1,6 @@
 file_storage:
   scheme: "file"
-  path: "/Users/${USER}/Work/NFSD_WORK/ccache_samples"
+  host: "/Users/${USER}/Work/NFSD_WORK/ccache_samples"
 log_dir: "/Users/${USER}/Work/NFSD_WORK/ccache_sample_log"
 console_log: true
 key_by_content: true

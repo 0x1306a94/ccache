@@ -26,10 +26,10 @@
 #include <boost/log/utility/setup/file.hpp>
 #include <yaml-cpp/yaml.h>
 
+#include "ProjectConfig.hpp"
 #include "Util.hpp"
 #include "ccache.hpp"
 #include "cli.hpp"
-#include "config.hpp"
 #include "context.hpp"
 #include "env_key.h"
 #include "fmtmacros.hpp"
@@ -114,23 +114,31 @@ int main(int argc, char *const *argv) {
         return EXIT_SUCCESS;
     }
 
-    const char *config_file_path = getenv(CCACHE_ENV_CONFIG_KEY);
+    const char *config_file_path = getenv(CCACHE_PROJECT_ENV_CONFIG_KEY);
     if (config_file_path == NULL) {
-        std::cout << "Set the CCACHE_CONFIG environment variable first" << std::endl;
+        std::cout << "Set the "
+                  << CCACHE_PROJECT_ENV_CONFIG_KEY
+                  << " environment variable first "
+                  << std::endl;
         return EXIT_FAILURE;
     }
 
-    ccache::Config config = YAML::LoadFile(config_file_path).as<ccache::Config>();
+    ccache::ProjectConfig config = YAML::LoadFile(config_file_path).as<ccache::ProjectConfig>();
     config.replace_environment_variables();
     //    std::stringstream ss;
     //    ss << YAML::Node(config);
-    //
     //    std::cout << ss.str() << std::endl;
+
+    if (argc <= 1) {
+        std::cout << "Missing parameter"
+                  << std::endl;
+        return EXIT_FAILURE;
+    }
 
     const char *build_id = getenv(LLBUILD_BUILD_ID_ENV_KEY);
     const char *build_task_id = getenv(LLBUILD_TASK_ID_ENV_KEY);
     ccache::Context ctx{
-        config.file_storage.path,
+        config.file_storage.host,
         config.log_dir,
         build_id == NULL ? std::string() : std::string(build_id),
         build_task_id == NULL ? std::string() : std::string(build_task_id),

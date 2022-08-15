@@ -1,22 +1,22 @@
 //
-//  config.hpp
+//  ProjectConfig.hpp
 //  ccache
 //
 //  Created by king on 2022/8/3.
 //
 
-#ifndef config_hpp
-#define config_hpp
+#ifndef ProjectConfig_hpp
+#define ProjectConfig_hpp
 
 #include <stdio.h>
 
 #include <yaml-cpp/yaml.h>
 
 namespace ccache {
-struct Config {
+struct ProjectConfig {
     struct FileStorage {
         std::string scheme;
-        std::string path;
+        std::string host;
     };
 
     std::vector<std::string> ignore_path_prefix;
@@ -37,8 +37,8 @@ namespace YAML {
 using namespace ccache;
 
 template <>
-struct convert<Config> {
-    static Node encode(const Config &rhs) {
+struct convert<ProjectConfig> {
+    static Node encode(const ProjectConfig &rhs) {
         Node node;
         Node ignore_path_prefix = node["ignore_path_prefix"];
         for (const std::string &prefix : rhs.ignore_path_prefix) {
@@ -62,7 +62,7 @@ struct convert<Config> {
         return node;
     }
 
-    static bool decode(const Node &node, Config &config) {
+    static bool decode(const Node &node, ProjectConfig &config) {
         Node ignore_path_prefix = node["ignore_path_prefix"];
         if (!ignore_path_prefix.IsSequence()) {
             return false;
@@ -75,7 +75,7 @@ struct convert<Config> {
         }
         config.remove_path_prefix = remove_path_prefix.as<std::vector<std::string>>();
         Node file_storage = node["file_storage"];
-        config.file_storage = file_storage.as<Config::FileStorage>();
+        config.file_storage = file_storage.as<ProjectConfig::FileStorage>();
         Node log_dir_node = node["log_dir"];
         if (log_dir_node.IsDefined()) {
             config.log_dir = log_dir_node.as<std::string>();
@@ -99,20 +99,20 @@ struct convert<Config> {
 };
 
 template <>
-struct convert<Config::FileStorage> {
-    static Node encode(const Config::FileStorage &rhs) {
+struct convert<ProjectConfig::FileStorage> {
+    static Node encode(const ProjectConfig::FileStorage &rhs) {
         Node node;
         node["scheme"] = rhs.scheme;
-        node["path"] = rhs.path;
+        node["host"] = rhs.host;
         return node;
     }
 
-    static bool decode(const Node &node, Config::FileStorage &storage) {
+    static bool decode(const Node &node, ProjectConfig::FileStorage &storage) {
         if (!node.IsMap()) {
             return false;
         }
         storage.scheme = node["scheme"].as<std::string>();
-        storage.path = node["path"].as<std::string>();
+        storage.host = node["host"].as<std::string>();
         return true;
     }
 };

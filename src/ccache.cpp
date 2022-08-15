@@ -8,8 +8,8 @@
 #include "ccache.hpp"
 
 #include "Finalizer.hpp"
+#include "ProjectConfig.hpp"
 #include "Util.hpp"
-#include "config.hpp"
 #include "configure.h"
 #include "context.hpp"
 #include "env_key.h"
@@ -43,7 +43,7 @@ namespace fs = boost::filesystem;
 
 namespace ccache {
 
-CCache::CCache(Config &config)
+CCache::CCache(ProjectConfig &config)
     : m_config(config) {
 
     BOOST_LOG_TRIVIAL(trace) << __FUNCTION__;

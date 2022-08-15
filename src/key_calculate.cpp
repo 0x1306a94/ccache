@@ -8,8 +8,8 @@
 #include "key_calculate.hpp"
 
 #include "Fd.hpp"
+#include "ProjectConfig.hpp"
 #include "Util.hpp"
-#include "config.hpp"
 #include "configure.h"
 #include "fmtmacros.hpp"
 
@@ -42,7 +42,7 @@ struct Impl {
     static std::unique_ptr<Impl> CreateImpl();
 };
 
-KeyCalculate::KeyCalculate(Config &config)
+KeyCalculate::KeyCalculate(ProjectConfig &config)
     : m_config(config)
     , PImpl(Impl::CreateImpl()) {
 
