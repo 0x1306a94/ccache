@@ -412,11 +412,6 @@ PODS:
   - WebViewJavascriptBridge (6.0.3)
   - YYModel (1.0.4)
   - YYText (1.0.7)
-  - ZFPlayer/AVPlayer (4.0.3):
-    - ZFPlayer/Core
-  - ZFPlayer/ControlView (4.0.3):
-    - ZFPlayer/Core
-  - ZFPlayer/Core (4.0.3)
 
 DEPENDENCIES:
   - AFNetworking
@@ -453,8 +448,6 @@ DEPENDENCIES:
   - WebViewJavascriptBridge
   - YYModel
   - YYText
-  - ZFPlayer/AVPlayer (= 4.0.3)
-  - ZFPlayer/ControlView (= 4.0.3)
 
 SPEC REPOS:
   trunk:
@@ -499,7 +492,6 @@ SPEC REPOS:
     - WebViewJavascriptBridge
     - YYModel
     - YYText
-    - ZFPlayer
 
 SPEC CHECKSUMS:
   AFNetworking: 7864c38297c79aaca1500c33288e429c3451fdce
@@ -543,8 +535,7 @@ SPEC CHECKSUMS:
   WebViewJavascriptBridge: 7f5bc4d3581e672e8f32bd0f812d54bc69bb8e29
   YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
   YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
-  ZFPlayer: 624c92de06eb34df322c3b53b4c9ce760f528f7a
 
-PODFILE CHECKSUM: 55d63cda03df6211213e5bf68821d5671159d63c
+PODFILE CHECKSUM: cda5a687a3f82f841a7cb8beb2b548c6d912bc07
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.11.3

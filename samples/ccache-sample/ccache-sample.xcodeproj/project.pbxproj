@@ -20,7 +20,7 @@
 		3CE264F428A69115004F8D6E /* Kit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3CE264EB28A69115004F8D6E /* Kit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3CE264FB28A69148004F8D6E /* KitObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 3CE264F928A69148004F8D6E /* KitObject.h */; };
 		3CE264FC28A69148004F8D6E /* KitObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 3CE264FA28A69148004F8D6E /* KitObject.m */; };
-		83E450D3F05C75ADCC042EF8 /* libPods-ccache-sample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6924FFD53B184A0B8FAC0BF /* libPods-ccache-sample.a */; };
+		EC48AAFBABDC7597B193DB7F /* libPods-ccache-sample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A31DC0DE8AE09582DD6026C4 /* libPods-ccache-sample.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,7 +70,7 @@
 		3CE264EE28A69115004F8D6E /* Kit.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Kit.docc; sourceTree = "<group>"; };
 		3CE264F928A69148004F8D6E /* KitObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KitObject.h; sourceTree = "<group>"; };
 		3CE264FA28A69148004F8D6E /* KitObject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KitObject.m; sourceTree = "<group>"; };
-		D6924FFD53B184A0B8FAC0BF /* libPods-ccache-sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ccache-sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A31DC0DE8AE09582DD6026C4 /* libPods-ccache-sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ccache-sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0FFDD2734A4E6340B4C1099 /* Pods-ccache-sample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ccache-sample.debug.xcconfig"; path = "Target Support Files/Pods-ccache-sample/Pods-ccache-sample.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -79,8 +79,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				83E450D3F05C75ADCC042EF8 /* libPods-ccache-sample.a in Frameworks */,
 				3CE264F328A69115004F8D6E /* Kit.framework in Frameworks */,
+				EC48AAFBABDC7597B193DB7F /* libPods-ccache-sample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,7 +158,7 @@
 		4DDF2A0FAF78C990372C501B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D6924FFD53B184A0B8FAC0BF /* libPods-ccache-sample.a */,
+				A31DC0DE8AE09582DD6026C4 /* libPods-ccache-sample.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -497,6 +497,7 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 492U995837;
+				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ccache-sample/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -510,6 +511,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.taihe.ccache-sample";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "match Development com.taihe.*";
@@ -528,6 +533,8 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 492U995837;
+				EXCLUDED_ARCHS = "";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ccache-sample/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -541,6 +548,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.taihe.ccache-sample";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "match Development com.taihe.*";

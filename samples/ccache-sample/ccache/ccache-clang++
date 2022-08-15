@@ -2,13 +2,14 @@
 
 # ccache-clang++
 CUR_DIR=$(dirname $0)
-CCACHE_EXEC_DIR=$CUR_DIR/../../../build
-export CCACHE_CONFIG=$CUR_DIR/../../config.yaml
+export CCACHE_PROJECT_CONFIG=$CUR_DIR/../../config.yaml
 export CCACHE_INTERNAL_TRACE=1
- env
+CCACHE_EXEC_DIR=$CUR_DIR/../../../build
+export PATH=$CCACHE_EXEC_DIR:$PATH
+env
 
 echo "LLBUILD_BUILD_ID: ${LLBUILD_BUILD_ID}"
 echo "LLBUILD_TASK_ID: ${LLBUILD_TASK_ID}"
 
 # /usr/bin/clang++ "$@"
-$CCACHE_EXEC_DIR/ccache /usr/bin/clang++ "$@"
+ccache /usr/bin/clang++ "$@"
